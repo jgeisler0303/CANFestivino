@@ -51,9 +51,10 @@ struct struct_s_PDO_status {
   TIMER_HANDLE event_timer;
   TIMER_HANDLE inhibit_timer;
   Message last_message;
+  UNS8 event_trigger;
 };
 
-#define s_PDO_status_Initializer {0, TIMER_NONE, TIMER_NONE, Message_Initializer}
+#define s_PDO_status_Initializer {0, TIMER_NONE, TIMER_NONE, Message_Initializer, 0}
 
 /** definitions of the different types of PDOs' transmission
  * 

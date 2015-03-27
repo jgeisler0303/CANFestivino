@@ -58,6 +58,7 @@ struct struct_CO_Data {
 	UNS8 *bDeviceNodeId;
 	const indextable *objdict;
 	s_PDO_status *PDO_status;
+	UNS8 currentPDO;
 	TIMER_HANDLE *RxPDO_EventTimers;
 	void (*RxPDO_EventTimers_Handler)(CO_Data*, UNS32);
 	const quick_index *firstIndex;
@@ -87,16 +88,18 @@ struct struct_CO_Data {
 	UNS16 *ProducerHeartBeatTime;
 	TIMER_HANDLE ProducerHeartBeatTimer;
 	heartbeatError_t heartbeatError;
+#if defined CO_ENABLE_CONSUMER_HEART_BEAT || defined CO_ENABLE_NODE_GUARD
 	e_nodeState NMTable[NMT_MAX_NODE_ID]; 
-
+#endif
 	/* NMT-nodeguarding */
 	TIMER_HANDLE GuardTimeTimer;
 	TIMER_HANDLE LifeTimeTimer;
 	nodeguardError_t nodeguardError;
 	UNS16 *GuardTime;
 	UNS8 *LifeTimeFactor;
+#ifdef CO_ENABLE_NODE_GUARD
 	UNS8 nodeGuardStatus[NMT_MAX_NODE_ID];
-
+#endif
 	/* SYNC */
 	TIMER_HANDLE syncTimer;
 	UNS32 *COB_ID_Sync;
@@ -139,11 +142,22 @@ struct struct_CO_Data {
 };
 
 #define NMTable_Initializer Unknown_state,
+#if defined CO_ENABLE_CONSUMER_HEART_BEAT || defined CO_ENABLE_NODE_GUARD
+  #define NMTable_Array_Initializer {REPEAT_NMT_MAX_NODE_ID_TIMES(NMTable_Initializer)}, /* is  well initialized at "Unknown_state". Is it ok ? (FD)*/
+#else
+  #define NMTable_Array_Initializer
+#endif
+
 #define nodeGuardStatus_Initializer 0x00,
+#ifdef CO_ENABLE_NODE_GUARD
+  #define nodeGuardStatus_Array_Initializer {REPEAT_NMT_MAX_NODE_ID_TIMES(nodeGuardStatus_Initializer)},
+#else
+  #define nodeGuardStatus_Array_Initializer 
+#endif
 
 #ifdef SDO_DYNAMIC_BUFFER_ALLOCATION
 #define s_transfer_Initializer {\
-		0,          /* CliServ{REPEAT_NMT_MAX_NODE_ID_TIMES(NMTable_Initializer)},Nbr */\
+		0,          /* CliServNbr */\
 		0,          /* wohami */\
 		SDO_RESET,  /* state */\
 		0,          /* toggle */\
@@ -250,6 +264,7 @@ struct struct_CO_Data {
 	& NODE_PREFIX ## _bDeviceNodeId,     /* bDeviceNodeId */\
 	NODE_PREFIX ## _objdict,             /* objdict  */\
 	NODE_PREFIX ## _PDO_status,          /* PDO_status */\
+	0,                                   /* currentPDO */ \
 	NULL,                                /* RxPDO_EventTimers */\
 	_RxPDO_EventTimers_Handler,          /* RxPDO_EventTimers_Handler */\
 	& NODE_PREFIX ## _firstIndex,        /* firstIndex */\
@@ -290,8 +305,7 @@ struct struct_CO_Data {
 	TIMER_NONE,                                /* ProducerHeartBeatTimer */\
 	_heartbeatError,           /* heartbeatError */\
 	\
-	{REPEAT_NMT_MAX_NODE_ID_TIMES(NMTable_Initializer)},\
-                                                   /* is  well initialized at "Unknown_state". Is it ok ? (FD)*/\
+	NMTable_Array_Initializer  \
 	\
 	/* NMT-nodeguarding */\
 	TIMER_NONE,                                /* GuardTimeTimer */\
@@ -299,7 +313,7 @@ struct struct_CO_Data {
 	_nodeguardError,           /* nodeguardError */\
 	& NODE_PREFIX ## _obj100C,                 /* GuardTime */\
 	& NODE_PREFIX ## _obj100D,                 /* LifeTimeFactor */\
-	{REPEAT_NMT_MAX_NODE_ID_TIMES(nodeGuardStatus_Initializer)},\
+	nodeGuardStatus_Array_Initializer\
 	\
 	/* SYNC */\
 	TIMER_NONE,                                /* syncTimer */\

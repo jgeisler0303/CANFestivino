@@ -35,27 +35,18 @@
 #include "data.h"
 #include "lifegrd.h"
 #include "canfestival.h"
-#include "dcf.h"
 #include "sysdep.h"
 
 
-void ConsumerHeartbeatAlarm(CO_Data* d, UNS32 id);
-void ProducerHeartbeatAlarm(CO_Data* d, UNS32 id);
-UNS32 OnHearbeatProducerUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 unused_bSubindex);
-
-void GuardTimeAlarm(CO_Data* d, UNS32 id);
-UNS32 OnNodeGuardUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 unused_bSubindex);
-
-
-e_nodeState getNodeState (CO_Data* d, UNS8 nodeId)
-{
-  e_nodeState networkNodeState = Unknown_state;
-  #if NMT_MAX_NODE_ID>0
-  if(nodeId < NMT_MAX_NODE_ID)
-    networkNodeState = d->NMTable[nodeId];
-  #endif
-  return networkNodeState;
-}
+// e_nodeState getNodeState (CO_Data* d, UNS8 nodeId)
+// {
+//   e_nodeState networkNodeState = Unknown_state;
+//   #if NMT_MAX_NODE_ID>0
+//   if(nodeId < NMT_MAX_NODE_ID)
+//     networkNodeState = d->NMTable[nodeId];
+//   #endif
+//   return networkNodeState;
+// }
 
 /*! 
 ** The Consumer Timer Callback
@@ -66,6 +57,7 @@ e_nodeState getNodeState (CO_Data* d, UNS8 nodeId)
 **/
 void ConsumerHeartbeatAlarm(CO_Data* d, UNS32 id)
 {
+#ifdef CO_ENABLE_CONSUMER_HEART_BEAT
   UNS8 nodeId = (UNS8)(((d->ConsumerHeartbeatEntries[id]) & (UNS32)0x00FF0000) >> (UNS8)16);
   /*MSG_WAR(0x00, "ConsumerHearbeatAlarm", 0x00);*/
 
@@ -77,10 +69,12 @@ void ConsumerHeartbeatAlarm(CO_Data* d, UNS32 id)
   d->NMTable[nodeId] = Disconnected;
   /*! call heartbeat error with NodeId */
   (*d->heartbeatError)(d, nodeId);
+#endif
 }
 
 void proceedNODE_GUARD(CO_Data* d, Message* m )
 {
+#ifdef CO_ENABLE_NODE_GUARD
   UNS8 nodeId = (UNS8) GET_NODE_ID((*m));
 
   if((m->rtr == 1) )
@@ -161,6 +155,7 @@ void proceedNODE_GUARD(CO_Data* d, Message* m )
           }
       }
     }
+#endif
 }
 
 /*! The Producer Timer Callback
@@ -209,6 +204,7 @@ void ProducerHeartbeatAlarm(CO_Data* d, UNS32 id)
  */
 void GuardTimeAlarm(CO_Data* d, UNS32 id)
 {
+#ifdef CO_ENABLE_NODE_GUARD
   if (*d->GuardTime) {
     UNS8 i;
 
@@ -246,10 +242,9 @@ void GuardTimeAlarm(CO_Data* d, UNS32 id)
   } else {
     d->GuardTimeTimer = DelAlarm(d->GuardTimeTimer);
   }
-
-
-
+#endif
 }
+
 
 /**
  * This function is called, if index 0x100C or 0x100D is updated to
@@ -262,9 +257,11 @@ void GuardTimeAlarm(CO_Data* d, UNS32 id)
  */
 UNS32 OnNodeGuardUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 unused_bSubindex)
 {
+#ifdef CO_ENABLE_NODE_GUARD
   nodeguardStop(d);
   nodeguardInit(d);
   return 0;
+#endif
 }
 
 
@@ -293,6 +290,7 @@ void heartbeatInit(CO_Data* d)
 
   d->toggle = 0;
 
+#ifdef CO_ENABLE_CONSUMER_HEART_BEAT
   for( index = (UNS8)0x00; index < *d->ConsumerHeartbeatCount; index++ )
     {
       TIMEVAL time = (UNS16) ( (d->ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF ) ;
@@ -301,7 +299,7 @@ void heartbeatInit(CO_Data* d)
           d->ConsumerHeartBeatTimers[index] = SetAlarm(d, index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
         }
     }
-
+#endif
   if ( *d->ProducerHeartBeatTime )
     {
       TIMEVAL time = *d->ProducerHeartBeatTime;
@@ -312,6 +310,7 @@ void heartbeatInit(CO_Data* d)
 
 void nodeguardInit(CO_Data* d)
 {
+#ifdef CO_ENABLE_NODE_GUARD
 
   RegisterSetODentryCallBack(d, 0x100C, 0x00, &OnNodeGuardUpdate);
   RegisterSetODentryCallBack(d, 0x100D, 0x00, &OnNodeGuardUpdate);
@@ -333,16 +332,18 @@ void nodeguardInit(CO_Data* d)
     MSG_WAR(0x0, "Timer for node-guarding startet", 0);
   }
 
+#endif
 }
 
 void heartbeatStop(CO_Data* d)
 {
+#ifdef CO_ENABLE_CONSUMER_HEART_BEAT
   UNS8 index;
   for( index = (UNS8)0x00; index < *d->ConsumerHeartbeatCount; index++ )
     {
       d->ConsumerHeartBeatTimers[index] = DelAlarm(d->ConsumerHeartBeatTimers[index]);
     }
-
+#endif
   d->ProducerHeartBeatTimer = DelAlarm(d->ProducerHeartBeatTimer);
 }
 

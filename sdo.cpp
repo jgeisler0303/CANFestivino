@@ -911,6 +911,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 					MSG_WAR(0x3A74, "SDO. End of download defined at index 0x1200 + ", CliServNbr);
 				}
 			} /* end if SERVER */
+#ifdef CO_ENABLE_SDO_CLIENT
 			else { /* if CLIENT */
 				/* I am CLIENT */
 				/* It is a request for a previous upload segment. We should find a line opened for this.*/
@@ -960,6 +961,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 					MSG_WAR(0x3A78, "SDO send upload segment request to nodeId", nodeId);
 				}
 			} /* End if CLIENT */
+#endif
 			break;
 
 		case 1:
@@ -1033,6 +1035,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 					data[i] = 0;
 				sendSDO(d, whoami, CliServNbr, data);
 			} /* end if I am SERVER */
+#ifdef CO_ENABLE_SDO_CLIENT
 			else {
 				/* I am CLIENT */
 				/* It is a response for a previous download segment. We should find a line opened for this. */
@@ -1091,6 +1094,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 				MSG_WAR(0x3A88, "SDO sending download segment to nodeId", nodeId);
 				sendSDO(d, whoami, CliServNbr, data);
 			} /* end if I am a CLIENT */
+#endif
 			break;
 
 		case 2:
@@ -1164,6 +1168,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 					resetSDOline(d, line);
 				}
 			} /* end if I am SERVER*/
+#ifdef CO_ENABLE_SDO_CLIENT
 			else {
 				/* I am CLIENT */
 				/* It is the response for the previous initiate upload request.*/
@@ -1215,6 +1220,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 					sendSDO(d, whoami, CliServNbr, data);
 				}
 			} /* End if CLIENT */
+#endif
 			break;
 
 		case 3:
@@ -1274,6 +1280,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 					resetSDOline(d, line);
 				}
 			} /* end if SERVER*/
+#ifdef CO_ENABLE_SDO_CLIENT
 			else {
 				/* I am CLIENT */
 				/* It is the response for the previous initiate download request. */
@@ -1324,6 +1331,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 				sendSDO(d, whoami, CliServNbr, data);
 
 			} /* end if I am a CLIENT		*/
+#endif
 			break;
 
 		case 4:
@@ -1343,6 +1351,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 				/* Tips : The end user has no way to know that the server node has received an abort SDO. */
 				/* Its is ok, I think.*/
 			}
+#ifdef CO_ENABLE_SDO_CLIENT
 			else { /* If I am CLIENT */
 				if (!err) {
 					/* The line *must* be released by the core program. */
@@ -1355,6 +1364,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 				else
 					MSG_WAR(0x3AB1, "SD0. Received SDO abort. No line found. Code : ", abortCode);
 			}
+#endif
 			break;
 		case 5: /* Command specifier for data transmission - the client or server is the data producer */
 			SubCommand = getSDOblockSC(m->data[0]);
@@ -1492,6 +1502,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
                     }
                 }
 			}      /* end if SERVER */
+#ifdef CO_ENABLE_SDO_CLIENT
 			else { /* if CLIENT (block download) */
                 if ((SubCommand == SDO_BSS_INITIATE_DOWNLOAD_RESPONSE) || (SubCommand == SDO_BSS_DOWNLOAD_RESPONSE)) {
                     /* We should find a line opened for this. */
@@ -1576,6 +1587,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 	    			return 0xFF;
 				}
 			}      /* end if CLIENT */
+#endif
 			break;
 		case 6: /* Command specifier for data reception - the client or server is the data consumer */
 			if (whoami == SDO_SERVER) { /* Server block download */
@@ -1694,6 +1706,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 					MSG_WAR(0x3AAF, "SDO. End of block download defined at index 0x1200 + ", CliServNbr);
 				}
 		    }      /* end if SERVER */
+#ifdef CO_ENABLE_SDO_CLIENT
 		    else { /* if CLIENT (block upload) */
 				if (err) {
        				/* Nothing already started */
@@ -1786,6 +1799,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 				    if(d->transfers[line].Callback) (*d->transfers[line].Callback)(d,nodeId);
 				}
 			}      /* end if CLIENT */
+#endif
 			break;
 		default:
 			/* Error : Unknown cs */

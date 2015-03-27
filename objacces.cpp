@@ -121,6 +121,12 @@ UNS32 getODentryImpl( CO_Data* d,
     return SDOABT_OUT_OF_MEMORY;
   }
 
+  if(wIndex>=0x2000 && wIndex<0x6000 && Callback && Callback[bSubindex]) {
+    errorCode = (Callback[bSubindex])(d, ptrTable, bSubindex);
+    if(errorCode != OD_SUCCESSFUL)
+      return errorCode;
+  }
+
   *pDataType = ptrTable->pSubindex[bSubindex].bDataType;
   szData = ptrTable->pSubindex[bSubindex].size;
 

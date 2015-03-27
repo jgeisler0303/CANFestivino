@@ -90,12 +90,13 @@ void proceedNMTstateChange(CO_Data* d, Message *m)
             if(currentNodeId!=d->lss_transfer.nodeID)
                currentNodeId = d->lss_transfer.nodeID;
 #endif
-
+#ifdef CO_ENABLE_CHANGE_NODE_ID
             // clear old NodeId to make SetNodeId reinitializing
             // SDO, EMCY and other COB Ids
             *d->bDeviceNodeId = 0xFF; 
          
             setNodeId(d, currentNodeId);
+#endif
          }
          setState(d,Initialisation);
          break;

@@ -38,6 +38,8 @@
 #include "sysdep.h"
 #include "dcf.h"
 
+#ifdef INCLUDE_DCF_FUNCTION
+
 typedef struct {
     UNS16 Index;
     UNS8 Subindex;
@@ -288,3 +290,4 @@ void SaveNode(CO_Data* d, UNS8 nodeId)
     if(Ret)
         MSG_ERR(0x1A04,"Erreur writeNetworkDictCallBackAI",Ret);
 }
+#endif

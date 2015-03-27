@@ -133,6 +133,7 @@ UNS8 setState (CO_Data* d, e_nodeState newState);
  */
 UNS8 getNodeId (CO_Data* d);
 
+#ifdef CO_ENABLE_CHANGE_NODE_ID
 /** 
  * @ingroup statemachine
  * @brief Define the node ID. Initialize the object dictionary
@@ -140,6 +141,7 @@ UNS8 getNodeId (CO_Data* d);
  * @param nodeId The node ID to assign
  */
 void setNodeId (CO_Data* d, UNS8 nodeId);
+#endif
 
 /** 
  * @brief Some stuff to do when the node enter in pre-operational mode

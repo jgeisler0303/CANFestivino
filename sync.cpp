@@ -41,8 +41,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #include "canfestival.h"
 #include "sysdep.h"
 
-/* Prototypes for internals functions */
 
+/* Prototypes for internals functions */
+#ifdef INCLUDE_SYNC_FUNCTIONS
 /*!                                                                                                
 **                                                                                                 
 **                                                                                                 
@@ -154,6 +155,11 @@ UNS8 sendSYNC(CO_Data* d)
   proceedSYNC(d) ; 
   return res ;
 }
+
+#else
+void startSYNC(CO_Data* d) {}
+void stopSYNC(CO_Data* d) {}
+#endif
 
 /*!                                                                                                
 **                                                                                                 

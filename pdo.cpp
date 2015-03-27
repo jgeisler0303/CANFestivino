@@ -57,7 +57,8 @@ UNS8 buildPDO (CO_Data * d, UNS8 numPdo, Message * pdo)
 
   pdo->cob_id = (UNS16) UNS16_LE(*(UNS32*)TPDO_com->pSubindex[1].pObject & 0x7FF);
   pdo->rtr = NOT_A_REQUEST;
-
+  d->currentPDO= numPdo;
+  
   MSG_WAR (0x3009, "  PDO CobId is : ",
            *(UNS32 *) TPDO_com->pSubindex[1].pObject);
   MSG_WAR (0x300D, "  Number of objects mapped : ", *pMappingCount);
@@ -117,8 +118,7 @@ UNS8 buildPDO (CO_Data * d, UNS8 numPdo, Message * pdo)
 **
 ** @return
 **/
-UNS8
-sendPDOrequest (CO_Data * d, UNS16 RPDOIndex)
+UNS8 sendPDOrequest (CO_Data * d, UNS16 RPDOIndex)
 {
   UNS16 *pwCobId;
   UNS16 offset = d->firstIndex->PDO_RCV;
@@ -354,8 +354,7 @@ proceedPDO (CO_Data * d, Message * m)
                         transmit_type_parameter & PDO_RTR_SYNC_READY)
                       {
                         /*Data ready, just send */
-                        canSend (d->canHandle,
-                                 &d->PDO_status[numPdo].last_message);
+                        canSend (d->canHandle, &d->PDO_status[numPdo].last_message);
                         return 0;
                       }
                     else
@@ -497,15 +496,13 @@ static void sendPdo(CO_Data * d, UNS32 pdoNum, Message * pdo)
 ** @return
 **/
 
-UNS8
-sendPDOevent (CO_Data * d)
+UNS8 sendPDOevent (CO_Data * d)
 {
   /* Calls _sendPDOevent specifying it is not a sync event */
   return _sendPDOevent (d, 0);
 }
 
-UNS8
-sendOnePDOevent (CO_Data * d, UNS8 pdoNum)
+UNS8 sendOnePDOevent (CO_Data * d, UNS8 pdoNum)
 {
   UNS16 offsetObjdict;
   Message pdo;
@@ -529,17 +526,9 @@ sendOnePDOevent (CO_Data * d, UNS8 pdoNum)
     }
 
   /*Compare new and old PDO */
-  if (d->PDO_status[pdoNum].last_message.cob_id == pdo.cob_id
-      && d->PDO_status[pdoNum].last_message.len == pdo.len
-      && memcmp(d->PDO_status[pdoNum].last_message.data,
-					pdo.data, 8) == 0
-    )
-    {
-      /* No changes -> go to next pdo */
-      return 0;
-    }
-  else
-    {
+  if(!d->PDO_status[pdoNum].event_trigger)  {
+    return 0;
+  } else {
 
       TIMEVAL EventTimerDuration;
       TIMEVAL InhibitTimerDuration;
@@ -553,27 +542,31 @@ sendOnePDOevent (CO_Data * d, UNS8 pdoNum)
         *(UNS16 *) d->objdict[offsetObjdict].pSubindex[3].
         pObject;
 
-      /* Start both event_timer and inhibit_timer */
-      if (EventTimerDuration)
-        {
-          DelAlarm (d->PDO_status[pdoNum].event_timer);
-          d->PDO_status[pdoNum].event_timer =
-            SetAlarm (d, pdoNum, &PDOEventTimerAlarm,
-                      MS_TO_TIMEVAL (EventTimerDuration), 0);
-        }
+      UNS8 pTransmissionType= *((UNS8 *) d->objdict[offsetObjdict].pSubindex[2].pObject);
 
-      if (InhibitTimerDuration)
-        {
-          DelAlarm (d->PDO_status[pdoNum].inhibit_timer);
-          d->PDO_status[pdoNum].inhibit_timer =
-            SetAlarm (d, pdoNum, &PDOInhibitTimerAlarm,
-                      US_TO_TIMEVAL (InhibitTimerDuration *
-                                     100), 0);
-          /* and inhibit TPDO */
-          d->PDO_status[pdoNum].transmit_type_parameter |=
-            PDO_INHIBITED;
-        }
+      if ((pTransmissionType == TRANS_EVENT_PROFILE) || (pTransmissionType == TRANS_EVENT_SPECIFIC)) {
+	/* Start both event_timer and inhibit_timer */
+	if (EventTimerDuration)
+	  {
+	    DelAlarm (d->PDO_status[pdoNum].event_timer);
+	    d->PDO_status[pdoNum].event_timer =
+	      SetAlarm (d, pdoNum, &PDOEventTimerAlarm,
+			MS_TO_TIMEVAL (EventTimerDuration), 0);
+	  }
 
+	if (InhibitTimerDuration)
+	  {
+	    DelAlarm (d->PDO_status[pdoNum].inhibit_timer);
+	    d->PDO_status[pdoNum].inhibit_timer =
+	      SetAlarm (d, pdoNum, &PDOInhibitTimerAlarm,
+			US_TO_TIMEVAL (InhibitTimerDuration *
+				      100), 0);
+	    /* and inhibit TPDO */
+	    d->PDO_status[pdoNum].transmit_type_parameter |=
+	      PDO_INHIBITED;
+	  }
+      }
+      d->PDO_status[pdoNum].event_trigger= 0;
       sendPdo(d, pdoNum, &pdo);
     }
     return 1;
@@ -585,7 +578,7 @@ PDOEventTimerAlarm (CO_Data * d, UNS32 pdoNum)
   /* This is needed to avoid deletion of re-attribuated timer */
   d->PDO_status[pdoNum].event_timer = TIMER_NONE;
   /* force emission of PDO by artificially changing last emitted */
-  d->PDO_status[pdoNum].last_message.cob_id = 0;
+  d->PDO_status[pdoNum].event_trigger= 1;
   sendOnePDOevent (d, (UNS8) pdoNum);
 }
 
@@ -702,11 +695,8 @@ _sendPDOevent (CO_Data * d, UNS8 isSyncEvent)
                   /* If transmission on Event and not inhibited, check for changes */
                 }
               else
-                if ( (isSyncEvent && (*pTransmissionType == TRANS_SYNC_ACYCLIC))
-                     ||
-                     (!isSyncEvent && (*pTransmissionType == TRANS_EVENT_PROFILE || *pTransmissionType == TRANS_EVENT_SPECIFIC)
-                       && !(d->PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED)))
-                {
+                if ( (isSyncEvent && (*pTransmissionType == TRANS_SYNC_ACYCLIC)) ||
+                     (!isSyncEvent && (*pTransmissionType == TRANS_EVENT_PROFILE || *pTransmissionType == TRANS_EVENT_SPECIFIC) && !(d->PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED))) {
                   sendOnePDOevent(d, pdoNum);
                   status = state11;
                 }

@@ -34,6 +34,7 @@
 #include "canfestival.h"
 #include "sysdep.h"
 
+#ifdef CO_ENABLE_NODE_GUARD
 /*!
 **
 **
@@ -109,4 +110,8 @@ UNS8 masterRequestNodeState(CO_Data* d, UNS8 nodeId)
   }
   return masterSendNMTnodeguard(d,nodeId);
 }
-
+#else
+UNS8 masterSendNMTstateChange(CO_Data* d, UNS8 Node_ID, UNS8 cs) { }
+UNS8 masterSendNMTnodeguard(CO_Data* d, UNS8 nodeId) { }
+UNS8 masterRequestNodeState(CO_Data* d, UNS8 nodeId) {}
+#endif
