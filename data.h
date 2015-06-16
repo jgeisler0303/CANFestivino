@@ -102,7 +102,7 @@ struct struct_CO_Data {
 #endif
 	/* SYNC */
 	TIMER_HANDLE syncTimer;
-	UNS32 *COB_ID_Sync;
+	UNS16 *COB_ID_Sync;
 	UNS32 *Sync_Cycle_Period;
 	/*UNS32 *Sync_window_length;;*/
 	post_sync_t post_sync;
@@ -130,7 +130,7 @@ struct struct_CO_Data {
 	UNS8* error_number;
 	UNS32* error_first_element;
 	UNS8* error_register;
-    UNS32* error_cobid;
+    UNS16* error_cobid;
 	s_errors error_data[EMCY_MAX_ERRORS];
 	post_emcy_t post_emcy;
 	

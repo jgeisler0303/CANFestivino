@@ -103,7 +103,7 @@ UNS8 sendEMCY(CO_Data* d, UNS16 errCode, UNS8 errRegister, const void *Specific,
   
 	MSG_WAR(0x3051, "sendEMCY", 0);
   
-	m.cob_id = (UNS16)(*(UNS32*)d->error_cobid);
+	m.cob_id = (UNS16)(*(UNS16*)d->error_cobid);
 	m.rtr = NOT_A_REQUEST;	
 	m.Data[0] = errCode & 0xFF;        /* LSB */
 	m.Data[1] = (errCode >> 8) & 0xFF; /* MSB */

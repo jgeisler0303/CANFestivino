@@ -758,7 +758,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 	UNS32 abortCode;
 	UNS32 i;
 	UNS8	j;
-	UNS32 *pCobId = NULL;
+	UNS16 *pCobId = NULL;
 	UNS16 offset;
 	UNS16 lastIndex;
 	UNS8 SubCommand;	/* Block transfer only */
@@ -779,7 +779,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 			return 0xFF;
 		}
 		/* Looking for the cobid received. */
-		pCobId = (UNS32*) d->objdict[offset].pSubindex[1].pObject;
+		pCobId = (UNS16*) d->objdict[offset].pSubindex[1].pObject;
 		if ( *pCobId == UNS16_LE(m->cob_id) ) {
 			whoami = SDO_SERVER;
 			MSG_WAR(0x3A62, "proceedSDO. I am server. index : ", 0x1200 + j);
@@ -801,7 +801,7 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 				return 0xFF;
 			}
 			/* Looking for the cobid received. */
-			pCobId = (UNS32*) d->objdict[offset].pSubindex[2].pObject;
+			pCobId = (UNS16*) d->objdict[offset].pSubindex[2].pObject;
 			if (*pCobId == UNS16_LE(m->cob_id) ) {
 				whoami = SDO_CLIENT;
 				MSG_WAR(0x3A64, "proceedSDO. I am client index : ", 0x1280 + j);
@@ -2067,8 +2067,8 @@ UNS8 writeNetworkDictCallBackAI (CO_Data* d, UNS8 nodeId, UNS16 index,
 			nodeIdServer = *(UNS8*) d->objdict[offset].pSubindex[3].pObject;
 			if(nodeIdServer == 0)
 			{
-				*(UNS32*)d->objdict[offset].pSubindex[1].pObject = (UNS32)(0x600 + nodeId);
-				*(UNS32*)d->objdict[offset].pSubindex[2].pObject = (UNS32)(0x580 + nodeId);
+				*(UNS16*)d->objdict[offset].pSubindex[1].pObject = (UNS16)(0x600 + nodeId);
+				*(UNS16*)d->objdict[offset].pSubindex[2].pObject = (UNS16)(0x580 + nodeId);
 				*(UNS8*) d->objdict[offset].pSubindex[3].pObject = nodeId;
 				return _writeNetworkDict (d, nodeId, index, subIndex, count, dataType, data, Callback, endianize, useBlockMode);
 			}
@@ -2229,8 +2229,8 @@ UNS8 readNetworkDictCallbackAI (CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subIn
 			nodeIdServer = *(UNS8*) d->objdict[offset].pSubindex[3].pObject;
 			if(nodeIdServer == 0)
 			{
-				*(UNS32*)d->objdict[offset].pSubindex[1].pObject = (UNS32)(0x600 + nodeId);
-				*(UNS32*)d->objdict[offset].pSubindex[2].pObject = (UNS32)(0x580 + nodeId);
+				*(UNS16*)d->objdict[offset].pSubindex[1].pObject = (UNS16)(0x600 + nodeId);
+				*(UNS16*)d->objdict[offset].pSubindex[2].pObject = (UNS16)(0x580 + nodeId);
 				*(UNS8*) d->objdict[offset].pSubindex[3].pObject = nodeId;
 				return _readNetworkDict (d, nodeId, index, subIndex, dataType, Callback, useBlockMode);
 			}
