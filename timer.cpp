@@ -54,7 +54,7 @@ TIMER_HANDLE last_timer_raw = -1;
 **
 ** @return
 **/
-TIMER_HANDLE SetAlarm(CO_Data* d, UNS32 id, TimerCallback_t callback, TIMEVAL value, TIMEVAL period)
+TIMER_HANDLE SetAlarm(CO_Data* d, UNS8 id, TimerCallback_t callback, TIMEVAL value, TIMEVAL period)
 {
 	TIMER_HANDLE row_number;
 	s_timer_entry *row;

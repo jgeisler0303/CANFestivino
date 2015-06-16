@@ -44,7 +44,7 @@ struct struct_s_timer_entry {
 	UNS8 state;
 	CO_Data* d;
 	TimerCallback_t callback; /* The callback func. */
-	UNS32 id; /* The callback func. */
+	UNS8 id; /* The callback func. */
 	TIMEVAL val;
 	TIMEVAL interval; /* Periodicity */
 };
@@ -63,7 +63,7 @@ typedef struct struct_s_timer_entry s_timer_entry;
  * @param period Call periodically the callback function
  * @return handle The timer handle
  */
-TIMER_HANDLE SetAlarm(CO_Data* d, UNS32 id, TimerCallback_t callback, TIMEVAL value, TIMEVAL period);
+TIMER_HANDLE SetAlarm(CO_Data* d, UNS8 id, TimerCallback_t callback, TIMEVAL value, TIMEVAL period);
 
 /**
  * @ingroup timer
