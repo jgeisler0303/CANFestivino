@@ -83,11 +83,11 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 typedef struct td_subindex
 {
-    UNS8                    bAccessType;
-    UNS8                    bDataType; /* Defines of what datatype the entry is */
+    UNS8                    bAccessType:2;
+    UNS8                    bDataType:6; /* Defines of what datatype the entry is */
     UNS8                   size;      /* The size (in Byte) of the variable */
     void*                   pObject;   /* This is the pointer of the Variable */
-} subindex;
+} __attribute__ ((packed)) subindex;
 
 /** Struct for creating entries in the communictaion profile
  */
