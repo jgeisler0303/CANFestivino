@@ -112,7 +112,7 @@ typedef struct s_quick_index{
 
 
 /*typedef struct struct_CO_Data CO_Data; */
-typedef UNS32 (*ODCallback_t)(CO_Data* d, const indextable *, UNS8 bSubindex);
+typedef UNS32 (*ODCallback_t)(CO_Data* d, const indextable *, UNS8 bSubindex, UNS8 writeAccess);
 typedef const indextable * (*scanIndexOD_t)(UNS16 wIndex, UNS32 * errorCode, ODCallback_t **Callback);
 
 /************************** MACROS *********************************/

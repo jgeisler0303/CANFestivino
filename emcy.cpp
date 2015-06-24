@@ -40,7 +40,7 @@
 
 
 
-UNS32 OnNumberOfErrorsUpdate(CO_Data* d, const indextable * unsused_indextable, UNS8 unsused_bSubindex);
+UNS32 OnNumberOfErrorsUpdate(CO_Data* d, const indextable * unsused_indextable, UNS8 unsused_bSubindex, UNS8 writeAccess);
 
 #define Data data  /* temporary fix */
 
@@ -54,9 +54,10 @@ UNS32 OnNumberOfErrorsUpdate(CO_Data* d, const indextable * unsused_indextable, 
 **
 ** @return
 **/
-UNS32 OnNumberOfErrorsUpdate(CO_Data* d, const indextable * unsused_indextable, UNS8 unsused_bSubindex)
-{
+UNS32 OnNumberOfErrorsUpdate(CO_Data* d, const indextable * unsused_indextable, UNS8 unsused_bSubindex, UNS8 writeAccess) {
 	UNS8 index;
+	
+	if(!writeAccess) return 0;
   // if 0, reset Pre-defined Error Field
   // else, don't change and give an abort message (eeror code: 0609 0030h)
 	if (*d->error_number == 0)

@@ -230,10 +230,7 @@ UNS32 _setODentry( CO_Data* d,
  * - OD_SUCCESSFUL is returned upon success. 
  * - SDO abort code is returned if error occurs . (See file def.h)
  */
-#define setODentry( d, wIndex, bSubindex, pSourceData, pExpectedSize, \
-                  checkAccess) \
-       _setODentry( d, wIndex, bSubindex, pSourceData, pExpectedSize, \
-                  checkAccess, 1)
+#define setODentry( d, wIndex, bSubindex, pSourceData, pExpectedSize, checkAccess) _setODentry( d, wIndex, bSubindex, pSourceData, pExpectedSize, checkAccess, 1)
 
 /** @fn UNS32 writeLocalDict(d, wIndex, bSubindex, pSourceData, pExpectedSize, checkAccess)
  * @ingroup od

@@ -166,9 +166,7 @@ UNS8 sendPDOrequest (CO_Data * d, UNS16 RPDOIndex)
 **
 ** @return
 **/
-UNS8
-proceedPDO (CO_Data * d, Message * m)
-{
+UNS8 proceedPDO (CO_Data * d, Message * m) {
   UNS8 numPdo;
   UNS8 numMap;                  /* Number of the mapped varable */
   UNS8 *pMappingCount = NULL;   /* count of mapped objects... */
@@ -193,17 +191,13 @@ proceedPDO (CO_Data * d, Message * m)
   offset = 0x00;
   numPdo = 0;
   numMap = 0;
-  if ((*m).rtr == NOT_A_REQUEST)
-    { 
+  if ((*m).rtr == NOT_A_REQUEST) { 
       offsetObjdict = d->firstIndex->PDO_RCV;
       lastIndex = d->lastIndex->PDO_RCV;
 
       if (offsetObjdict)
-        while (offsetObjdict <= lastIndex)
-          {
-            switch (status)
-              {
-
+        while (offsetObjdict <= lastIndex) {
+            switch (status) {
               case state2:
                 pwCobId = (UNS16 *)d->objdict[offsetObjdict].pSubindex[1].pObject;
                 if (*pwCobId == UNS16_LE(m->cob_id))
@@ -228,17 +222,12 @@ proceedPDO (CO_Data * d, Message * m)
                    dictionnary. */
                 offsetObjdict = d->firstIndex->PDO_RCV_MAP;
                 lastIndex = d->lastIndex->PDO_RCV_MAP;
-                pMappingCount =
-                  (UNS8 *) (d->objdict + offsetObjdict +
-                            numPdo)->pSubindex[0].pObject;
+                pMappingCount = (UNS8 *) (d->objdict + offsetObjdict + numPdo)->pSubindex[0].pObject;
                 numMap = 0;
-                while (numMap < *pMappingCount)
-                  {
+                while (numMap < *pMappingCount) {
                     UNS8 tmp[] = { 0, 0, 0, 0, 0, 0, 0, 0 };
                     UNS32 ByteSize;
-                    pMappingParameter =
-                      (UNS32 *) (d->objdict + offsetObjdict +
-                                 numPdo)->pSubindex[numMap + 1].pObject;
+                    pMappingParameter = (UNS32 *) (d->objdict + offsetObjdict + numPdo)->pSubindex[numMap + 1].pObject;
                     if (pMappingParameter == NULL)
                       {
                         MSG_ERR (0x1937, "Couldn't get mapping parameter : ",
@@ -256,18 +245,13 @@ proceedPDO (CO_Data * d, Message * m)
 
                     /* set variable only if Size != 0 and 
                      * Size is lower than remaining bits in the PDO */
-                    if (Size && ((offset + Size) <= (m->len << 3)))
-                      {
+                    if (Size && ((offset + Size) <= (m->len << 3))) {
                         /* copy bit per bit in little endian */
-                        CopyBits (Size, (UNS8 *) & m->data[offset >> 3],
-                                  offset % 8, 0, ((UNS8 *) tmp), 0, 0);
+                        CopyBits (Size, (UNS8 *) & m->data[offset >> 3], offset % 8, 0, ((UNS8 *) tmp), 0, 0);
                         /*1->8 => 1 ; 9->16 =>2, ... */
                         ByteSize = (UNS32)(1 + ((Size - 1) >> 3));
 
-                        objDict =
-                          setODentry (d, (UNS16) ((*pMappingParameter) >> 16),
-                                      (UNS8) (((*pMappingParameter) >> 8) &
-                                              0xFF), tmp, &ByteSize, 0);
+                        objDict = setODentry (d, (UNS16) ((*pMappingParameter) >> 16), (UNS8) (((*pMappingParameter) >> 8) & 0xFF), tmp, &ByteSize, 0);
 
                         if (objDict != OD_SUCCESSFUL)
                           {
@@ -292,13 +276,11 @@ proceedPDO (CO_Data * d, Message * m)
                       }
                     numMap++;
                   }             /* end loop while on mapped variables */
-                if (d->RxPDO_EventTimers)
-                {
+                if (d->RxPDO_EventTimers) {
                     TIMEVAL EventTimerDuration = *(UNS16 *)d->objdict[offsetObjdict].pSubindex[5].pObject;
                     if(EventTimerDuration){
                         DelAlarm (d->RxPDO_EventTimers[numPdo]);
-                        d->RxPDO_EventTimers[numPdo] = SetAlarm (d, numPdo, d->RxPDO_EventTimers_Handler,
-                        MS_TO_TIMEVAL (EventTimerDuration), 0);
+                        d->RxPDO_EventTimers[numPdo] = SetAlarm (d, numPdo, d->RxPDO_EventTimers_Handler, MS_TO_TIMEVAL (EventTimerDuration), 0);
                     }
                 }
                 return 0;
@@ -306,8 +288,7 @@ proceedPDO (CO_Data * d, Message * m)
               }                 /* end switch status */
           }                     /* end while */
     }                           /* end if Donnees */
-  else if ((*m).rtr == REQUEST)
-    {
+  else if ((*m).rtr == REQUEST) {
       MSG_WAR (0x3946, "Receive a PDO request cobId : ", UNS16_LE(m->cob_id));
       status = state1;
       offsetObjdict = d->firstIndex->PDO_TRS;
@@ -597,10 +578,9 @@ UNS8 _sendPDOevent (CO_Data * d, UNS8 isSyncEvent) {
   UNS16 offsetObjdict = d->firstIndex->PDO_TRS;
   UNS16 lastIndex = d->lastIndex->PDO_TRS;
 
-  if (!d->CurrentCommunicationState.csPDO)
-    {
+  if (!d->CurrentCommunicationState.csPDO) {
       return 0;
-    }
+  }
 
 
   /* study all PDO stored in the objects dictionary */
@@ -694,11 +674,10 @@ UNS8 _sendPDOevent (CO_Data * d, UNS8 isSyncEvent) {
 **/
 
 UNS32
-TPDO_Communication_Parameter_Callback (CO_Data * d,
-                                       const indextable * OD_entry,
-                                       UNS8 bSubindex)
-{
+TPDO_Communication_Parameter_Callback (CO_Data * d, const indextable * OD_entry, UNS8 bSubindex, UNS8 writeAccess) {
   /* If PDO are actives */
+  if(!writeAccess) return 0;
+  
   if (d->CurrentCommunicationState.csPDO)
     switch (bSubindex)
       {

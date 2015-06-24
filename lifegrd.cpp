@@ -275,8 +275,9 @@ UNS32 OnNodeGuardUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 u
 ** @return
  * @ingroup heartbeato
 **/
-UNS32 OnHeartbeatProducerUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 unused_bSubindex)
-{
+UNS32 OnHeartbeatProducerUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 unused_bSubindex, UNS8 writeAccess) {
+  if(!writeAccess) return 0;
+  
   heartbeatStop(d);
   heartbeatInit(d);
   return 0;

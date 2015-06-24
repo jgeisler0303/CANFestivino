@@ -122,7 +122,7 @@ UNS32 getODentryImpl( CO_Data* d,
   }
 
   if(wIndex>=0x2000 && wIndex<0x6000 && Callback && Callback[bSubindex]) {
-    errorCode = (Callback[bSubindex])(d, ptrTable, bSubindex);
+    errorCode = (Callback[bSubindex])(d, ptrTable, bSubindex, 0);
     if(errorCode != OD_SUCCESSFUL)
       return errorCode;
   }
@@ -175,14 +175,7 @@ UNS32 getODentryImpl( CO_Data* d,
   return OD_SUCCESSFUL;
 }
 
-UNS32 _setODentry( CO_Data* d,
-                   UNS16 wIndex,
-                   UNS8 bSubindex,
-                   void * pSourceData,
-                   UNS32 * pExpectedSize,
-                   UNS8 checkAccess,
-                   UNS8 endianize)
-{
+UNS32 _setODentry( CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData, UNS32 * pExpectedSize, UNS8 checkAccess, UNS8 endianize) {
   UNS32 szData;
   UNS8 dataType;
   UNS32 errorCode;
@@ -208,11 +201,7 @@ UNS32 _setODentry( CO_Data* d,
   dataType = ptrTable->pSubindex[bSubindex].bDataType;
   szData = ptrTable->pSubindex[bSubindex].size;
 
-  if( *pExpectedSize == 0 ||
-      *pExpectedSize == szData ||
-      /* allow to store a shorter string than entry size */
-      (dataType == CANopen_TYPE_visible_string && *pExpectedSize < szData))
-    {
+  if( *pExpectedSize == 0 || *pExpectedSize == szData ||  /* allow to store a shorter string than entry size */ (dataType == CANopen_TYPE_visible_string && *pExpectedSize < szData)) {
 #ifdef CANOPEN_BIG_ENDIAN
       /* re-endianize do not occur for bool, strings time and domains */
       if(endianize && dataType > CANopen_TYPE_boolean && !(
@@ -246,10 +235,11 @@ UNS32 _setODentry( CO_Data* d,
         ((UNS8*)ptrTable->pSubindex[bSubindex].pObject)[*pExpectedSize] = 0;
       
       *pExpectedSize = szData;
-
+      
+      // TODO: distinguishbetween read and write
       /* Callbacks */
-      if(Callback && Callback[bSubindex]){
-        errorCode = (Callback[bSubindex])(d, ptrTable, bSubindex);
+      if(Callback && Callback[bSubindex]) {
+        errorCode = (Callback[bSubindex])(d, ptrTable, bSubindex, 1);
         if(errorCode != OD_SUCCESSFUL)
         {
             return errorCode;
