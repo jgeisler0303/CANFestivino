@@ -178,7 +178,7 @@ UNS8 sendLSS (CO_Data* d, UNS8 command,void *dat1, void *dat2);
 
 /** transmit a LSS message on CAN bus
  * comamnd is the LSS command specifier
- * bus_id is MLSS_ADRESS or SLSS_ADRESS depending in d->iam_a_slave. 
+ * bus_id is MLSS_ADRESS or SLSS_ADRESS depending in ObjDict_iam_a_slave. 
  * dat1 and dat2 are pointers to optional data (depend on command).
  * return canSend(bus_id,&m)
  */

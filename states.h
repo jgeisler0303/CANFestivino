@@ -74,28 +74,28 @@ typedef void (*stopped_t)(CO_Data*);
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
-void _initialisation(CO_Data* d);
+// void _initialisation(CO_Data* d);
 
 /** 
  * @ingroup statemachine
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
-void _preOperational(CO_Data* d);
+// void _preOperational(CO_Data* d);
 
 /**
  * @ingroup statemachine 
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
-void _operational(CO_Data* d);
+// void _operational(CO_Data* d);
 
 /** 
  * @ingroup statemachine
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
-void _stopped(CO_Data* d);
+// void _stopped(CO_Data* d);
 
 #include "data.h"
 

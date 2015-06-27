@@ -85,7 +85,7 @@ typedef struct td_subindex
 {
     UNS8                    bAccessType:2;
     UNS8                    bDataType:6; /* Defines of what datatype the entry is */
-    UNS8                   size;      /* The size (in Byte) of the variable */
+    //UNS8                   size;      /* The size (in Byte) of the variable */
     void*                   pObject;   /* This is the pointer of the Variable */
 } __attribute__ ((packed)) subindex;
 
@@ -98,7 +98,7 @@ typedef struct td_indextable
                          * This count here defines how many memory has been
                          * allocated. this memory does not have to be used.
                          */
-    UNS16   index;
+    //UNS16   index;
 } indextable;
 
 typedef struct s_quick_index{

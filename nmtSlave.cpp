@@ -52,7 +52,7 @@ void proceedNMTstateChange(CO_Data* d, Message *m)
     /* Check if this NMT-message is for this node */
     /* byte 1 = 0 : all the nodes are concerned (broadcast) */
 
-    if( ( (*m).data[1] == 0 ) || ( (*m).data[1] == *d->bDeviceNodeId ) ){
+    if( ( (*m).data[1] == 0 ) || ( (*m).data[1] ==  ObjDict_bDeviceNodeId) ){
 
       switch( (*m).data[0]){ /* command specifier (cs) */
       case NMT_Start_Node:
@@ -73,8 +73,8 @@ void proceedNMTstateChange(CO_Data* d, Message *m)
         break;
 
       case NMT_Reset_Node:
-         if(d->NMT_Slave_Node_Reset_Callback != NULL)
-            d->NMT_Slave_Node_Reset_Callback(d);
+//          if(d->NMT_Slave_Node_Reset_Callback != NULL)
+//             d->NMT_Slave_Node_Reset_Callback(d);
         setState(d,Initialisation);
         break;
 
@@ -82,8 +82,8 @@ void proceedNMTstateChange(CO_Data* d, Message *m)
          {
          UNS8 currentNodeId = getNodeId(d);
          
-            if(d->NMT_Slave_Communications_Reset_Callback != NULL)
-               d->NMT_Slave_Communications_Reset_Callback(d);
+//             if(d->NMT_Slave_Communications_Reset_Callback != NULL)
+//                d->NMT_Slave_Communications_Reset_Callback(d);
 #ifdef CO_ENABLE_LSS
             // LSS changes NodeId here in case lss_transfer.nodeID doesn't 
             // match current getNodeId()
@@ -128,13 +128,13 @@ UNS8 slaveSendBootUp(CO_Data* d)
 
   /* message configuration */
   {
-	  UNS16 tmp = NODE_GUARD << 7 | *d->bDeviceNodeId; 
+	  UNS16 tmp = NODE_GUARD << 7 | ObjDict_bDeviceNodeId; 
 	  m.cob_id = UNS16_LE(tmp);
   }
   m.rtr = NOT_A_REQUEST;
   m.len = 1;
   m.data[0] = 0x00;
 
-  return canSend(d->canHandle,&m);
+  return canSend(&m);
 }
 

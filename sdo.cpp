@@ -139,11 +139,11 @@ void SDOTimeoutAlarm(CO_Data* d, UNS32 id)
 	UNS16 offset;
 	UNS8 nodeId;
 	/* Get the client->server cobid.*/
-	offset = d->firstIndex->SDO_CLT;
-	if ((offset == 0) || ((offset+d->transfers[id].CliServNbr) > d->lastIndex->SDO_CLT)) {
+	offset = ObjDict_firstIndex.SDO_CLT;
+	if ((offset == 0) || ((offset+d->transfers[id].CliServNbr) > ObjDict_lastIndex.SDO_CLT)) {
 		return ;
 	}
-	nodeId = (UNS8) *((UNS32*) d->objdict[offset+d->transfers[id].CliServNbr].pSubindex[3].pObject);
+	nodeId = (UNS8) *((UNS32*) ObjDict_objdict[offset+d->transfers[id].CliServNbr].pSubindex[3].pObject);
 	MSG_ERR(0x1A01, "SDO timeout. SDO response not received.", 0);
 	MSG_WAR(0x2A02, "server node id : ", nodeId);
 	MSG_WAR(0x2A02, "         index : ", d->transfers[id].index);
@@ -673,22 +673,22 @@ UNS8 sendSDO (CO_Data* d, UNS8 whoami, UNS8 CliServNbr, UNS8 *pData)
 
 	/*get the server->client cobid*/
 	if ( whoami == SDO_SERVER )	{
-		offset = d->firstIndex->SDO_SVR;
-		if ((offset == 0) || ((offset+CliServNbr) > d->lastIndex->SDO_SVR)) {
+		offset = ObjDict_firstIndex.SDO_SVR;
+		if ((offset == 0) || ((offset+CliServNbr) > ObjDict_lastIndex.SDO_SVR)) {
 			MSG_ERR(0x1A42, "SendSDO : SDO server not found", 0);
 			return 0xFF;
 		}
-		m.cob_id = (UNS16) *((UNS32*) d->objdict[offset+CliServNbr].pSubindex[2].pObject);
+		m.cob_id = (UNS16) *((UNS32*) ObjDict_objdict[offset+CliServNbr].pSubindex[2].pObject);
 		MSG_WAR(0x3A41, "I am server Tx cobId : ", m.cob_id);
 	}
 	else {			/*case client*/
 		/* Get the client->server cobid.*/
-		offset = d->firstIndex->SDO_CLT;
-		if ((offset == 0) || ((offset+CliServNbr) > d->lastIndex->SDO_CLT)) {
+		offset = ObjDict_firstIndex.SDO_CLT;
+		if ((offset == 0) || ((offset+CliServNbr) > ObjDict_lastIndex.SDO_CLT)) {
 			MSG_ERR(0x1A42, "SendSDO : SDO client not found", 0);
 			return 0xFF;
 		}
-		m.cob_id = (UNS16) *((UNS32*) d->objdict[offset+CliServNbr].pSubindex[1].pObject);
+		m.cob_id = (UNS16) *((UNS32*) ObjDict_objdict[offset+CliServNbr].pSubindex[1].pObject);
 		MSG_WAR(0x3A41, "I am client Tx cobId : ", m.cob_id);
 	}
 	/* message copy for sending */
@@ -698,7 +698,7 @@ UNS8 sendSDO (CO_Data* d, UNS8 whoami, UNS8 CliServNbr, UNS8 *pData)
 	for (i = 0 ; i < 8 ; i++) {
 		m.data[i] =  pData[i];
 	}
-	return canSend(d->canHandle,&m);
+	return canSend(&m);
 }
 
 /*!
@@ -770,16 +770,16 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 	whoami = SDO_UNKNOWN;
 	/* Looking for the cobId in the object dictionary. */
 	/* Am-I a server ? */
-	offset = d->firstIndex->SDO_SVR;
-	lastIndex = d->lastIndex->SDO_SVR;
+	offset = ObjDict_firstIndex.SDO_SVR;
+	lastIndex = ObjDict_lastIndex.SDO_SVR;
 	j = 0;
 	if(offset) while (offset <= lastIndex) {
-		if (d->objdict[offset].bSubCount <= 1) {
+		if (ObjDict_objdict[offset].bSubCount <= 1) {
 			MSG_ERR(0x1A61, "Subindex 1  not found at index ", 0x1200 + j);
 			return 0xFF;
 		}
 		/* Looking for the cobid received. */
-		pCobId = (UNS16*) d->objdict[offset].pSubindex[1].pObject;
+		pCobId = (UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject;
 		if ( *pCobId == UNS16_LE(m->cob_id) ) {
 			whoami = SDO_SERVER;
 			MSG_WAR(0x3A62, "proceedSDO. I am server. index : ", 0x1200 + j);
@@ -792,23 +792,23 @@ UNS8 proceedSDO (CO_Data* d, Message *m)
 	} /* end while */
 	if (whoami == SDO_UNKNOWN) {
 		/* Am-I client ? */
-		offset = d->firstIndex->SDO_CLT;
-		lastIndex = d->lastIndex->SDO_CLT;
+		offset = ObjDict_firstIndex.SDO_CLT;
+		lastIndex = ObjDict_lastIndex.SDO_CLT;
 		j = 0;
 		if(offset) while (offset <= lastIndex) {
-			if (d->objdict[offset].bSubCount <= 3) {
+			if (ObjDict_objdict[offset].bSubCount <= 3) {
 				MSG_ERR(0x1A63, "Subindex 3  not found at index ", 0x1280 + j);
 				return 0xFF;
 			}
 			/* Looking for the cobid received. */
-			pCobId = (UNS16*) d->objdict[offset].pSubindex[2].pObject;
+			pCobId = (UNS16*) ObjDict_objdict[offset].pSubindex[2].pObject;
 			if (*pCobId == UNS16_LE(m->cob_id) ) {
 				whoami = SDO_CLIENT;
 				MSG_WAR(0x3A64, "proceedSDO. I am client index : ", 0x1280 + j);
 				/* Defining Client number = index minus 0x1280 where the cobid received is defined. */
 				CliServNbr = j;
 				/* Reading the server node ID, if client it is mandatory in the OD */
-				nodeId = *((UNS8*) d->objdict[offset].pSubindex[3].pObject);
+				nodeId = *((UNS8*) ObjDict_objdict[offset].pSubindex[3].pObject);
 				break;
 			}
 			j++;
@@ -1830,20 +1830,20 @@ UNS8 GetSDOClientFromNodeId( CO_Data* d, UNS8 nodeId )
 	UNS16 offset;
 	UNS8 nodeIdServer;
 
-	offset = d->firstIndex->SDO_CLT;
-	lastIndex = d->lastIndex->SDO_CLT;
+	offset = ObjDict_firstIndex.SDO_CLT;
+	lastIndex = ObjDict_lastIndex.SDO_CLT;
 	if (offset == 0) {
 		MSG_ERR(0x1AC6, "No SDO client index found for nodeId ", nodeId);
 		return 0xFF;
 	}
 	CliNbr = 0;
 	while (offset <= lastIndex) {
-		if (d->objdict[offset].bSubCount <= 3) {
+		if (ObjDict_objdict[offset].bSubCount <= 3) {
 			MSG_ERR(0x1AC8, "Subindex 3  not found at index ", 0x1280 + CliNbr);
 			return 0xFF;
 		}
 		/* looking for the server nodeId */
-		nodeIdServer = *((UNS8*) d->objdict[offset].pSubindex[3].pObject);
+		nodeIdServer = *((UNS8*) ObjDict_objdict[offset].pSubindex[3].pObject);
 		MSG_WAR(0x1AD2, "index : ", 0x1280 + CliNbr);
 		MSG_WAR(0x1AD3, "nodeIdServer : ", nodeIdServer);
 
@@ -2049,8 +2049,8 @@ UNS8 writeNetworkDictCallBackAI (CO_Data* d, UNS8 nodeId, UNS16 index,
 	ret = _writeNetworkDict (d, nodeId, index, subIndex, count, dataType, data, Callback, endianize, useBlockMode);
 	if(ret == 0xFE)
 	{
-		offset = d->firstIndex->SDO_CLT;
-		lastIndex = d->lastIndex->SDO_CLT;
+		offset = ObjDict_firstIndex.SDO_CLT;
+		lastIndex = ObjDict_lastIndex.SDO_CLT;
 		if (offset == 0)
 		{
 			MSG_ERR(0x1AC6, "writeNetworkDict : No SDO client index found", 0);
@@ -2059,17 +2059,17 @@ UNS8 writeNetworkDictCallBackAI (CO_Data* d, UNS8 nodeId, UNS16 index,
 		// i = 0;
 		while (offset <= lastIndex)
 		{
-			if (d->objdict[offset].bSubCount <= 3)
+			if (ObjDict_objdict[offset].bSubCount <= 3)
 			{
 				MSG_ERR(0x1AC8, "Subindex 3  not found at index ", 0x1280 + i);
 				return 0xFF;
 			}
-			nodeIdServer = *(UNS8*) d->objdict[offset].pSubindex[3].pObject;
+			nodeIdServer = *(UNS8*) ObjDict_objdict[offset].pSubindex[3].pObject;
 			if(nodeIdServer == 0)
 			{
-				*(UNS16*)d->objdict[offset].pSubindex[1].pObject = (UNS16)(0x600 + nodeId);
-				*(UNS16*)d->objdict[offset].pSubindex[2].pObject = (UNS16)(0x580 + nodeId);
-				*(UNS8*) d->objdict[offset].pSubindex[3].pObject = nodeId;
+				*(UNS16*)ObjDict_objdict[offset].pSubindex[1].pObject = (UNS16)(0x600 + nodeId);
+				*(UNS16*)ObjDict_objdict[offset].pSubindex[2].pObject = (UNS16)(0x580 + nodeId);
+				*(UNS8*) ObjDict_objdict[offset].pSubindex[3].pObject = nodeId;
 				return _writeNetworkDict (d, nodeId, index, subIndex, count, dataType, data, Callback, endianize, useBlockMode);
 			}
 			offset++;
@@ -2211,8 +2211,8 @@ UNS8 readNetworkDictCallbackAI (CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subIn
 	ret = _readNetworkDict (d, nodeId, index, subIndex, dataType, Callback, useBlockMode);
 	if(ret == 0xFE)
 	{
-		offset = d->firstIndex->SDO_CLT;
-		lastIndex = d->lastIndex->SDO_CLT;
+		offset = ObjDict_firstIndex.SDO_CLT;
+		lastIndex = ObjDict_lastIndex.SDO_CLT;
 		if (offset == 0)
 		{
 			MSG_ERR(0x1AC6, "writeNetworkDict : No SDO client index found", 0);
@@ -2221,17 +2221,17 @@ UNS8 readNetworkDictCallbackAI (CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subIn
 		// i = 0;
 		while (offset <= lastIndex)
 		{
-			if (d->objdict[offset].bSubCount <= 3)
+			if (ObjDict_objdict[offset].bSubCount <= 3)
 			{
 				MSG_ERR(0x1AC8, "Subindex 3  not found at index ", 0x1280 + i);
 				return 0xFF;
 			}
-			nodeIdServer = *(UNS8*) d->objdict[offset].pSubindex[3].pObject;
+			nodeIdServer = *(UNS8*) ObjDict_objdict[offset].pSubindex[3].pObject;
 			if(nodeIdServer == 0)
 			{
-				*(UNS16*)d->objdict[offset].pSubindex[1].pObject = (UNS16)(0x600 + nodeId);
-				*(UNS16*)d->objdict[offset].pSubindex[2].pObject = (UNS16)(0x580 + nodeId);
-				*(UNS8*) d->objdict[offset].pSubindex[3].pObject = nodeId;
+				*(UNS16*)ObjDict_objdict[offset].pSubindex[1].pObject = (UNS16)(0x600 + nodeId);
+				*(UNS16*)ObjDict_objdict[offset].pSubindex[2].pObject = (UNS16)(0x580 + nodeId);
+				*(UNS8*) ObjDict_objdict[offset].pSubindex[3].pObject = nodeId;
 				return _readNetworkDict (d, nodeId, index, subIndex, dataType, Callback, useBlockMode);
 			}
 			offset++;

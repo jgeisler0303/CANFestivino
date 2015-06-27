@@ -40,6 +40,44 @@
 
 #include "data.h"
 
+UNS8 objectSize(subindex *s) {
+  switch(s->bDataType) {
+    case CANopen_TYPE_boolean:
+    case CANopen_TYPE_int8:
+    case CANopen_TYPE_uint8:
+    case CANopen_TYPE_domain: return 1;
+
+    case CANopen_TYPE_int16:
+    case CANopen_TYPE_uint16: return 2;
+
+    case CANopen_TYPE_int32:
+    case CANopen_TYPE_uint32:
+    case CANopen_TYPE_real32: return 4;
+
+    case CANopen_TYPE_int24:
+    case CANopen_TYPE_uint24: return 3;
+
+    case CANopen_TYPE_real64:
+    case CANopen_TYPE_int64:
+    case CANopen_TYPE_uint64: return 8;
+
+    case CANopen_TYPE_int40:
+    case CANopen_TYPE_uint40: return 5;
+
+    case CANopen_TYPE_int48:
+    case CANopen_TYPE_uint48: return 6;
+
+    case CANopen_TYPE_int56:
+    case CANopen_TYPE_uint56: return 7;
+    
+    case CANopen_TYPE_visible_string: return 10; // TODO: figure aut way to return true size
+    case CANopen_TYPE_octet_string: return 10; // TODO: figure aut way to return true size
+    case CANopen_TYPE_unicode_string: return 10; // TODO: figure aut way to return true size
+  }
+
+  return 0;
+}
+
 //We need the function implementation for linking
 //Only a placeholder with a define isnt enough!
 UNS8 accessDictionaryError(UNS16 index, UNS8 subIndex,
@@ -94,7 +132,7 @@ UNS32 getODentryImpl( CO_Data* d,
   const indextable *ptrTable;
   ODCallback_t *Callback;
 
-  ptrTable = (*d->scanIndexOD)(wIndex, &errorCode, &Callback);
+  ptrTable = ObjDict_scanIndexOD(wIndex, &errorCode, &Callback);
 
   if (errorCode != OD_SUCCESSFUL)
     return errorCode;
@@ -114,10 +152,10 @@ UNS32 getODentryImpl( CO_Data* d,
     return SDOABT_GENERAL_ERROR;
   }
 
-  if (ptrTable->pSubindex[bSubindex].size > *pExpectedSize) {
+  if (objectSize(&ptrTable->pSubindex[bSubindex]) > *pExpectedSize) {
     /* Requested variable is too large to fit into a transfer line, inform    *
      * the caller about the real size of the requested variable.              */
-    *pExpectedSize = ptrTable->pSubindex[bSubindex].size;
+    *pExpectedSize = objectSize(&ptrTable->pSubindex[bSubindex]);
     return SDOABT_OUT_OF_MEMORY;
   }
 
@@ -128,7 +166,7 @@ UNS32 getODentryImpl( CO_Data* d,
   }
 
   *pDataType = ptrTable->pSubindex[bSubindex].bDataType;
-  szData = ptrTable->pSubindex[bSubindex].size;
+  szData = objectSize(&ptrTable->pSubindex[bSubindex]);
 
 #  ifdef CANOPEN_BIG_ENDIAN
   if(endianize && *pDataType > CANopen_TYPE_boolean && !(
@@ -182,7 +220,7 @@ UNS32 _setODentry( CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData,
   const indextable *ptrTable;
   ODCallback_t *Callback;
 
-  ptrTable =(*d->scanIndexOD)(wIndex, &errorCode, &Callback);
+  ptrTable =ObjDict_scanIndexOD(wIndex, &errorCode, &Callback);
   if (errorCode != OD_SUCCESSFUL)
     return errorCode;
 
@@ -199,7 +237,7 @@ UNS32 _setODentry( CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData,
 
 
   dataType = ptrTable->pSubindex[bSubindex].bDataType;
-  szData = ptrTable->pSubindex[bSubindex].size;
+  szData = objectSize(&ptrTable->pSubindex[bSubindex]);
 
   if( *pExpectedSize == 0 || *pExpectedSize == szData ||  /* allow to store a shorter string than entry size */ (dataType == CANopen_TYPE_visible_string && *pExpectedSize < szData)) {
 #ifdef CANOPEN_BIG_ENDIAN
@@ -212,15 +250,15 @@ UNS32 _setODentry( CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData,
             testing without */
           /* additional temp variable */
           UNS8 i;
-          for ( i = 0 ; i < ( ptrTable->pSubindex[bSubindex].size >> 1)  ; i++)
+          for ( i = 0 ; i < ( objectSize(&ptrTable->pSubindex[bSubindex]))  ; i++)
             {
-              UNS8 tmp =((UNS8 *)pSourceData) [(ptrTable->pSubindex[bSubindex].size - 1) - i];
-              ((UNS8 *)pSourceData) [(ptrTable->pSubindex[bSubindex].size - 1) - i] = ((UNS8 *)pSourceData)[i];
+              UNS8 tmp =((UNS8 *)pSourceData) [(objectSize(&ptrTable->pSubindex[bSubindex]) - 1) - i];
+              ((UNS8 *)pSourceData) [(objectSize(&ptrTable->pSubindex[bSubindex]) - 1) - i] = ((UNS8 *)pSourceData)[i];
               ((UNS8 *)pSourceData)[i] = tmp;
             }
         }
 #endif
-      errorCode = (*d->valueRangeTest)(dataType, pSourceData);
+      errorCode = ObjDict_valueRangeTest(dataType, pSourceData);
       if (errorCode) {
         accessDictionaryError(wIndex, bSubindex, szData, *pExpectedSize, errorCode);
         return errorCode;
@@ -247,9 +285,9 @@ UNS32 _setODentry( CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData,
        }
 
       /* TODO : Store dans NVRAM */
-      if (ptrTable->pSubindex[bSubindex].bAccessType & TO_BE_SAVE){
-        (*d->storeODSubIndex)(d, wIndex, bSubindex);
-      }
+//       if (ptrTable->pSubindex[bSubindex].bAccessType & TO_BE_SAVE){
+//         (*d->storeODSubIndex)(d, wIndex, bSubindex);
+//       }
       return OD_SUCCESSFUL;
     }else{
       *pExpectedSize = szData;
@@ -260,7 +298,7 @@ UNS32 _setODentry( CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData,
 
 const indextable * scanIndexOD (CO_Data* d, UNS16 wIndex, UNS32 *errorCode, ODCallback_t **Callback)
 {
-  return (*d->scanIndexOD)(wIndex, errorCode, Callback);
+  return ObjDict_scanIndexOD(wIndex, errorCode, Callback);
 }
 
 UNS32 RegisterSetODentryCallBack(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, ODCallback_t Callback)
@@ -275,4 +313,4 @@ const indextable *odentry;
   return errorCode;
 }
 
-void _storeODSubIndex (CO_Data* d, UNS16 wIndex, UNS8 bSubindex){}
+// void _storeODSubIndex (CO_Data* d, UNS16 wIndex, UNS8 bSubindex){}

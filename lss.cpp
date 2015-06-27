@@ -180,8 +180,8 @@ void LssAlarmSDELAY(CO_Data* d, UNS32 id)
     	d->lss_transfer.switchDelayState=SDELAY_OFF;
     	StopLSS_SDELAY_TIMER();
     		
-    	if (*(d->iam_a_slave))
-    		d->canHandle=d->lss_transfer.canHandle_t;
+    	if (*(ObjDict_iam_a_slave))
+    		// d->canHandle=d->lss_transfer.canHandle_t;
     	else{
     		d->lss_transfer.dat1=0;
     		d->lss_transfer.state=LSS_FINISHED;
@@ -361,7 +361,7 @@ UNS8 sendSlaveLSSMessage(CO_Data* d, UNS8 command,void *dat1,void *dat2)
   	return 0xFF;
   }
   
-  return canSend(d->canHandle,&m);
+  return canSend(&m);
 }
 			
 /* If a baud rate is not supported just comment the line. */
@@ -437,8 +437,8 @@ UNS8 sendMasterLSSMessage(CO_Data* d, UNS8 command,void *dat1,void *dat2)
 	if(d->lss_transfer.baudRate!="none"){
 		d->lss_transfer.switchDelay=(UNS16)(*(UNS32*)dat1 & 0xFFFF);
 		d->lss_transfer.switchDelayState=SDELAY_FIRST;
-		d->lss_transfer.canHandle_t=d->canHandle;
-		res=canSend(d->canHandle,&m);
+// 		d->lss_transfer.canHandle_t=d->canHandle;
+		res=canSend(&m);
   		if(res==0){
   			StartLSS_SDELAY_TIMER();
   			d->lss_transfer.state=LSS_TRANS_IN_PROGRESS;
@@ -515,7 +515,7 @@ UNS8 sendMasterLSSMessage(CO_Data* d, UNS8 command,void *dat1,void *dat2)
   	return 0xFF;
   }
 	
-  res=canSend(d->canHandle,&m);
+  res=canSend(&m);
   if(res==0 && hasResponse==1){
   	StartLSS_MSG_TIMER();
   	d->lss_transfer.state=LSS_TRANS_IN_PROGRESS;
@@ -536,7 +536,7 @@ UNS8 sendLSS(CO_Data* d, UNS8 command,void *dat1,void *dat2)
   UNS8 res=1;
   
   /* Tha data sent with the msg depends on the command and if the sender is a master or a slave */
-  if (*(d->iam_a_slave)){ 
+  if (*(ObjDict_iam_a_slave)){ 
   	res = sendSlaveLSSMessage(d, command,dat1,dat2);
   }
   else {/* It is a Master */
@@ -754,8 +754,8 @@ UNS8 proceedLSS_Slave(CO_Data* d, Message* m )
 			d->lss_transfer.switchDelayState=SDELAY_FIRST;
 			//d->lss_transfer.currentState=getState(d);
 			//setState(d, LssTimingDelay);
-			d->lss_transfer.canHandle_t=d->canHandle;
-			d->canHandle=NULL;
+			// d->lss_transfer.canHandle_t=d->canHandle;
+			// d->canHandle=NULL;
 			StartLSS_SDELAY_TIMER();
 		}
 	break;
@@ -800,7 +800,7 @@ UNS8 proceedLSS_Slave(CO_Data* d, Message* m )
   			
 		_SpecificNodeInfo=getLSSIdent(m);
 				
-		ptrTable = (*d->scanIndexOD)(0x1018, &errorCode, &Callback);
+		ptrTable = ObjDict_scanIndexOD(0x1018, &errorCode, &Callback);
 		if(_SpecificNodeInfo==*(UNS32*)ptrTable->pSubindex[msg_cs-(LSS_SM_SELECTIVE_VENDOR-1)].pObject){
 			
 			d->lss_transfer.addr_sel_match|=(0x01<<(msg_cs-LSS_SM_SELECTIVE_VENDOR));
@@ -835,7 +835,7 @@ UNS8 proceedLSS_Slave(CO_Data* d, Message* m )
   		
 		_SpecificNodeInfo=getLSSIdent(m);
 		
-		ptrTable = (*d->scanIndexOD)(0x1018, &errorCode, &Callback);
+		ptrTable = ObjDict_scanIndexOD(0x1018, &errorCode, &Callback);
 			
 		/* Check if the data match the identity object. */
 		switch(msg_cs){
@@ -880,7 +880,7 @@ UNS8 proceedLSS_Slave(CO_Data* d, Message* m )
   		ODCallback_t *Callback;
   		UNS32 _SpecificNodeInfo;
   
-  		ptrTable = (*d->scanIndexOD)(0x1018, &errorCode, &Callback);
+  		ptrTable = ObjDict_scanIndexOD(0x1018, &errorCode, &Callback);
   		_SpecificNodeInfo=*(UNS32*)ptrTable->pSubindex[msg_cs-(LSS_INQ_VENDOR_ID-1)].pObject;
   		MSG_WAR(0x3D37, "SlaveLSS identity field inquired ", _SpecificNodeInfo);
 			
@@ -918,7 +918,7 @@ UNS8 proceedLSS_Slave(CO_Data* d, Message* m )
 			d->lss_transfer.LSSPos=0;
 			d->lss_transfer.FastScan_SM=LSS_FS_PROCESSING;
 			
-  			ptrTable = (*d->scanIndexOD)(0x1018, &errorCode, &Callback);
+  			ptrTable = ObjDict_scanIndexOD(0x1018, &errorCode, &Callback);
   			d->lss_transfer.IDNumber=*(UNS32*)ptrTable->pSubindex[d->lss_transfer.LSSPos+1].pObject;
 			
 			sendSlaveLSSMessage(d,LSS_IDENT_SLAVE,0,0);
@@ -968,7 +968,7 @@ UNS8 proceedLSS_Slave(CO_Data* d, Message* m )
   						ODCallback_t *Callback;
 		
 						d->lss_transfer.LSSPos=getLSSNext(m);
-						ptrTable = (*d->scanIndexOD)(0x1018, &errorCode, &Callback);
+						ptrTable = ObjDict_scanIndexOD(0x1018, &errorCode, &Callback);
   						d->lss_transfer.IDNumber=*(UNS32*)ptrTable->pSubindex[d->lss_transfer.LSSPos+1].pObject;
 						d->lss_transfer.FastScan_SM=LSS_FS_PROCESSING;						
 					}

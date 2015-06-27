@@ -93,18 +93,18 @@ void canDispatch(CO_Data* d, Message *m) {
 			proceedNODE_GUARD(d, m);
 		break;
 	case NMT:
-		if (*(d->iam_a_slave)) {
+		// if (ObjDict_iam_a_slave) {
 			proceedNMTstateChange(d, m);
-		}
+		// }
 		break;
 #ifdef CO_ENABLE_LSS
 		case LSS:
 		if (!d->CurrentCommunicationState.csLSS)break;
-		if ((*(d->iam_a_slave)) && cob_id==MLSS_ADRESS)
+		if ((*(ObjDict_iam_a_slave)) && cob_id==MLSS_ADRESS)
 		{
 			proceedLSS_Slave(d,m);
 		}
-		else if(!(*(d->iam_a_slave)) && cob_id==SLSS_ADRESS)
+		else if(!(*(ObjDict_iam_a_slave)) && cob_id==SLSS_ADRESS)
 		{
 			proceedLSS_Master(d,m);
 		}
@@ -162,7 +162,7 @@ UNS8 setState(CO_Data* d, e_nodeState newState) {
 			switchCommunicationState(d, &newCommunicationState);
 			/* call user app init callback now. */
 			/* d->initialisation MUST NOT CALL SetState */
-			(*d->initialisation)(d);
+			// (*d->initialisation)(d);
 		}
 
 			/* Automatic transition - No break statement ! */
@@ -176,7 +176,7 @@ UNS8 setState(CO_Data* d, e_nodeState newState) {
 					{ 0, 1, 1, 1, 1, 0, 1 };
 			d->nodeState = Pre_operational;
 			switchCommunicationState(d, &newCommunicationState);
-			(*d->preOperational)(d);
+			// (*d->preOperational)(d);
 		}
 			break;
 
@@ -189,7 +189,7 @@ UNS8 setState(CO_Data* d, e_nodeState newState) {
 				d->nodeState = Operational;
 				newState = Operational;
 				switchCommunicationState(d, &newCommunicationState);
-				(*d->operational)(d);
+				// (*d->operational)(d);
 			}
 			break;
 
@@ -202,7 +202,7 @@ UNS8 setState(CO_Data* d, e_nodeState newState) {
 				d->nodeState = Stopped;
 				newState = Stopped;
 				switchCommunicationState(d, &newCommunicationState);
-				(*d->stopped)(d);
+				// (*d->stopped)(d);
 			}
 			break;
 		default:
@@ -224,7 +224,7 @@ UNS8 setState(CO_Data* d, e_nodeState newState) {
  ** @return
  **/
 UNS8 getNodeId(CO_Data* d) {
-	return *d->bDeviceNodeId;
+	return ObjDict_bDeviceNodeId;
 }
 
 #ifdef CO_ENABLE_CHANGE_NODE_ID
@@ -235,7 +235,7 @@ UNS8 getNodeId(CO_Data* d) {
  ** @param nodeId
  **/
 void setNodeId(CO_Data* d, UNS8 nodeId) {
-	UNS16 offset = d->firstIndex->SDO_SVR;
+	UNS16 offset = ObjDict_firstIndex.SDO_SVR;
 
 #ifdef CO_ENABLE_LSS
 	d->lss_transfer.nodeID=nodeId;
@@ -252,14 +252,14 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
 
 	if (offset) {
 		/* Adjust COB-ID Client->Server (rx) only id already set to default value or id not valid (id==0xFF)*/
-		if ((*(UNS16*) d->objdict[offset].pSubindex[1].pObject == 0x600 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
+		if ((*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject == 0x600 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
 			/* cob_id_client = 0x600 + nodeId; */
-			*(UNS16*) d->objdict[offset].pSubindex[1].pObject = 0x600 + nodeId;
+			*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject = 0x600 + nodeId;
 		}
 		/* Adjust COB-ID Server -> Client (tx) only id already set to default value or id not valid (id==0xFF)*/
-		if ((*(UNS16*) d->objdict[offset].pSubindex[2].pObject == 0x580 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
+		if ((*(UNS16*) ObjDict_objdict[offset].pSubindex[2].pObject == 0x580 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
 			/* cob_id_server = 0x580 + nodeId; */
-			*(UNS16*) d->objdict[offset].pSubindex[2].pObject = 0x580 + nodeId;
+			*(UNS16*) ObjDict_objdict[offset].pSubindex[2].pObject = 0x580 + nodeId;
 		}
 	}
 
@@ -273,15 +273,15 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
 	 */
 	{
 		UNS8 i = 0;
-		UNS16 offset = d->firstIndex->PDO_RCV;
-		UNS16 lastIndex = d->lastIndex->PDO_RCV;
+		UNS16 offset = ObjDict_firstIndex.PDO_RCV;
+		UNS16 lastIndex = ObjDict_lastIndex.PDO_RCV;
 		UNS32 cobID[] = { 0x200, 0x300, 0x400, 0x500 };
 		if (offset)
 			while ((offset <= lastIndex) && (i < 4)) {
-				if ((*(UNS16*) d->objdict[offset].pSubindex[1].pObject
+				if ((*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject
 						== cobID[i] + *d->bDeviceNodeId)
 						|| (*d->bDeviceNodeId == 0xFF))
-					*(UNS16*) d->objdict[offset].pSubindex[1].pObject = cobID[i]
+					*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject = cobID[i]
 							+ nodeId;
 				i++;
 				offset++;
@@ -290,16 +290,16 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
 	/* ** Initialize the transmit PDO communication parameters. Only for 0x1800 to 0x1803 */
 	{
 		UNS8 i = 0;
-		UNS16 offset = d->firstIndex->PDO_TRS;
-		UNS16 lastIndex = d->lastIndex->PDO_TRS;
+		UNS16 offset = ObjDict_firstIndex.PDO_TRS;
+		UNS16 lastIndex = ObjDict_lastIndex.PDO_TRS;
 		UNS32 cobID[] = { 0x180, 0x280, 0x380, 0x480 };
 		i = 0;
 		if (offset)
 			while ((offset <= lastIndex) && (i < 4)) {
-				if ((*(UNS16*) d->objdict[offset].pSubindex[1].pObject
+				if ((*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject
 						== cobID[i] + *d->bDeviceNodeId)
 						|| (*d->bDeviceNodeId == 0xFF))
-					*(UNS16*) d->objdict[offset].pSubindex[1].pObject = cobID[i]
+					*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject = cobID[i]
 							+ nodeId;
 				i++;
 				offset++;
@@ -307,28 +307,25 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
 	}
 
 	/* Update EMCY COB-ID if already set to default*/
-	if ((*d->error_cobid == *d->bDeviceNodeId + 0x80)
+	if ((error_cobid == *d->bDeviceNodeId + 0x80)
 			|| (*d->bDeviceNodeId == 0xFF))
-		*d->error_cobid = nodeId + 0x80;
+		error_cobid = nodeId + 0x80;
 
 	/* bDeviceNodeId is defined in the object dictionary. */
 	*d->bDeviceNodeId = nodeId;
 }
 #endif
 
-void _initialisation(CO_Data* d) {
-}
+// void _initialisation(CO_Data* d) {}
 
-void _preOperational(CO_Data* d) {
-#ifdef CO_ENABLE_MASTER
-	if (!(*(d->iam_a_slave))) {
-		masterSendNMTstateChange(d, 0, NMT_Reset_Node);
-	}
-#endif
-}
+// void _preOperational(CO_Data* d) {
+// #ifdef CO_ENABLE_MASTER
+// 	if (!(*(ObjDict_iam_a_slave))) {
+// 		masterSendNMTstateChange(d, 0, NMT_Reset_Node);
+// 	}
+// #endif
+// }
 
-void _operational(CO_Data* d) {
-}
+// void _operational(CO_Data* d) {}
 
-void _stopped(CO_Data* d) {
-}
+// void _stopped(CO_Data* d) {}

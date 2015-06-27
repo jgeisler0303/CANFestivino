@@ -94,7 +94,7 @@ void startSYNC(CO_Data* d)
 	RegisterSetODentryCallBack(d, 0x1005, 0, &OnCOB_ID_SyncUpdate);
 	RegisterSetODentryCallBack(d, 0x1006, 0, &OnCOB_ID_SyncUpdate);
 
-	if(*d->COB_ID_Sync & 0x40000000ul && *d->Sync_Cycle_Period)
+	if(COB_ID_Sync & 0x40000000ul && Sync_Cycle_Period)
 	{
 		d->syncTimer = SetAlarm(
 				d,
@@ -132,11 +132,11 @@ UNS8 sendSYNCMessage(CO_Data* d)
   
   MSG_WAR(0x3001, "sendSYNC ", 0);
   
-  m.cob_id = (UNS16)UNS16_LE(*d->COB_ID_Sync);
+  m.cob_id = (UNS16)UNS16_LE(COB_ID_Sync);
   m.rtr = NOT_A_REQUEST;
   m.len = 0;
   
-  return canSend(d->canHandle,&m);
+  return canSend(&m);
 }
 
 

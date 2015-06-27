@@ -58,7 +58,7 @@
 void ConsumerHeartbeatAlarm(CO_Data* d, UNS32 id)
 {
 #ifdef CO_ENABLE_CONSUMER_HEART_BEAT
-  UNS8 nodeId = (UNS8)(((d->ConsumerHeartbeatEntries[id]) & (UNS32)0x00FF0000) >> (UNS8)16);
+  UNS8 nodeId = (UNS8)(((ConsumerHeartbeatEntries[id]) & (UNS32)0x00FF0000) >> (UNS8)16);
   /*MSG_WAR(0x00, "ConsumerHearbeatAlarm", 0x00);*/
 
   /* timer have been notified and is now free (non periodic)*/
@@ -106,7 +106,7 @@ void proceedNODE_GUARD(CO_Data* d, Message* m )
             d->toggle = 1 ;
           /* send the nodeguard response. */
           MSG_WAR(0x3130, "Sending NMT Nodeguard to master, state: ", d->nodeState);
-          canSend(d->canHandle,&msg );
+          canSend(&msg );
         }
 
     }else{ /* Not a request CAN */
@@ -142,12 +142,12 @@ void proceedNODE_GUARD(CO_Data* d, Message* m )
 
       if( d->NMTable[nodeId] != Unknown_state ) {
         UNS8 index, ConsumerHeartBeat_nodeId ;
-        for( index = (UNS8)0x00; index < *d->ConsumerHeartbeatCount; index++ )
+        for( index = (UNS8)0x00; index < ConsumerHeartbeatCount; index++ )
           {
-            ConsumerHeartBeat_nodeId = (UNS8)( ((d->ConsumerHeartbeatEntries[index]) & (UNS32)0x00FF0000) >> (UNS8)16 );
+            ConsumerHeartBeat_nodeId = (UNS8)( ((ConsumerHeartbeatEntries[index]) & (UNS32)0x00FF0000) >> (UNS8)16 );
             if ( nodeId == ConsumerHeartBeat_nodeId )
               {
-                TIMEVAL time = ( (d->ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF ) ;
+                TIMEVAL time = ( (ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF ) ;
                 /* Renew alarm for next heartbeat. */
                 DelAlarm(d->ConsumerHeartBeatTimers[index]);
                 d->ConsumerHeartBeatTimers[index] = SetAlarm(d, index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
@@ -167,7 +167,7 @@ void proceedNODE_GUARD(CO_Data* d, Message* m )
 **/
 void ProducerHeartbeatAlarm(CO_Data* d, UNS32 id)
 {
-  if(*d->ProducerHeartBeatTime)
+  if(ProducerHeartBeatTime)
     {
       Message msg;
       /* Time expired, the heartbeat must be sent immediately
@@ -175,14 +175,15 @@ void ProducerHeartbeatAlarm(CO_Data* d, UNS32 id)
       ** (decimal) and additionaly
       ** the node-id of this device.
       */
-      UNS16 tmp = *d->bDeviceNodeId + 0x700;
+      UNS16 tmp = (UNS16)ObjDict_bDeviceNodeId + 0x700;
+//       UNS16 tmp = 0x724;
       msg.cob_id = UNS16_LE(tmp);
       msg.len = (UNS8)0x01;
       msg.rtr = 0;
       msg.data[0] = d->nodeState; /* No toggle for heartbeat !*/
       /* send the heartbeat */
       MSG_WAR(0x3130, "Producing heartbeat: ", d->nodeState);
-      canSend(d->canHandle,&msg );
+      canSend(&msg );
 
     }else{
       d->ProducerHeartBeatTimer = DelAlarm(d->ProducerHeartBeatTimer);
@@ -292,18 +293,18 @@ void heartbeatInit(CO_Data* d)
   d->toggle = 0;
 
 #ifdef CO_ENABLE_CONSUMER_HEART_BEAT
-  for( index = (UNS8)0x00; index < *d->ConsumerHeartbeatCount; index++ )
+  for( index = (UNS8)0x00; index < ConsumerHeartbeatCount; index++ )
     {
-      TIMEVAL time = (UNS16) ( (d->ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF ) ;
+      TIMEVAL time = (UNS16) ( (ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF ) ;
       if ( time )
         {
           d->ConsumerHeartBeatTimers[index] = SetAlarm(d, index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
         }
     }
 #endif
-  if ( *d->ProducerHeartBeatTime )
+  if ( ProducerHeartBeatTime )
     {
-      TIMEVAL time = *d->ProducerHeartBeatTime;
+      TIMEVAL time = ProducerHeartBeatTime;
       d->ProducerHeartBeatTimer = SetAlarm(d, 0, &ProducerHeartbeatAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
     }
 }
@@ -340,7 +341,7 @@ void heartbeatStop(CO_Data* d)
 {
 #ifdef CO_ENABLE_CONSUMER_HEART_BEAT
   UNS8 index;
-  for( index = (UNS8)0x00; index < *d->ConsumerHeartbeatCount; index++ )
+  for( index = (UNS8)0x00; index < ConsumerHeartbeatCount; index++ )
     {
       d->ConsumerHeartBeatTimers[index] = DelAlarm(d->ConsumerHeartBeatTimers[index]);
     }
