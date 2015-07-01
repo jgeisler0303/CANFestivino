@@ -74,9 +74,8 @@ void SyncAlarm(CO_Data* d, UNS32 id)
 **                                                                                                 
 ** @return                                                                                         
 **/  
-UNS32 OnCOB_ID_SyncUpdate(CO_Data* d, const indextable * unsused_indextable, UNS8 unsused_bSubindex)
-{
-	startSYNC(d);
+UNS32 OnCOB_ID_SyncUpdate(const subindex * OD_entry, UNS16 bIndex, UNS8 bSubindex, UNS8 writeAccess) {
+	startSYNC();
 	return 0;
 }
 
@@ -85,23 +84,23 @@ UNS32 OnCOB_ID_SyncUpdate(CO_Data* d, const indextable * unsused_indextable, UNS
 **                                                                                                 
 ** @param d                                                                                        
 **/ 
-void startSYNC(CO_Data* d)
+void startSYNC()
 {
-	if(d->syncTimer != TIMER_NONE){
-		stopSYNC(d);
+	if(ObjDict_Data->syncTimer != TIMER_NONE){
+		stopSYNC();
 	}
 
-	RegisterSetODentryCallBack(d, 0x1005, 0, &OnCOB_ID_SyncUpdate);
-	RegisterSetODentryCallBack(d, 0x1006, 0, &OnCOB_ID_SyncUpdate);
+	RegisterSetODentryCallBack(ObjDict_Data, 0x1005, 0, &OnCOB_ID_SyncUpdate);
+	RegisterSetODentryCallBack(ObjDict_Data, 0x1006, 0, &OnCOB_ID_SyncUpdate);
 
 	if(COB_ID_Sync & 0x40000000ul && Sync_Cycle_Period)
 	{
-		d->syncTimer = SetAlarm(
-				d,
+		ObjDict_Data->syncTimer = SetAlarm(
+				ObjDict_Data,
 				0 /*No id needed*/,
 				&SyncAlarm,
-				US_TO_TIMEVAL(*d->Sync_Cycle_Period), 
-				US_TO_TIMEVAL(*d->Sync_Cycle_Period));
+				US_TO_TIMEVAL(*ObjDict_Data->Sync_Cycle_Period), 
+				US_TO_TIMEVAL(*ObjDict_Data->Sync_Cycle_Period));
 	}
 }
 
@@ -110,11 +109,11 @@ void startSYNC(CO_Data* d)
 **                                                                                                 
 ** @param d                                                                                        
 **/   
-void stopSYNC(CO_Data* d)
+void stopSYNC()
 {
-    RegisterSetODentryCallBack(d, 0x1005, 0, NULL);
-    RegisterSetODentryCallBack(d, 0x1006, 0, NULL);
-	d->syncTimer = DelAlarm(d->syncTimer);
+    RegisterSetODentryCallBack(ObjDict_Data, 0x1005, 0, NULL);
+    RegisterSetODentryCallBack(ObjDict_Data, 0x1006, 0, NULL);
+	ObjDict_Data->syncTimer = DelAlarm(ObjDict_Data->syncTimer);
 }
 
 

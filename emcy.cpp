@@ -54,14 +54,14 @@ UNS32 OnNumberOfErrorsUpdate(CO_Data* d, const indextable * unsused_indextable, 
 **
 ** @return
 **/
-UNS32 OnNumberOfErrorsUpdate(CO_Data* d, const indextable * unsused_indextable, UNS8 unsused_bSubindex, UNS8 writeAccess) {
+UNS32 OnNumberOfErrorsUpdate(const subindex * OD_entry, UNS16 bIndex, UNS8 bSubindex, UNS8 writeAccess) {
 	UNS8 index;
 	
 	if(!writeAccess) return 0;
   // if 0, reset Pre-defined Error Field
   // else, don't change and give an abort message (eeror code: 0609 0030h)
 	if (error_number == 0)
-		for (index = 0; index < d->error_history_size; ++index)
+		for (index = 0; index < ObjDict_Data.error_history_size; ++index)
 			*(error_first_element + index) = 0;		/* clear all the fields in Pre-defined Error Field (1003h) */
 	else
 		;// abort message
@@ -98,8 +98,7 @@ void emergencyStop(CO_Data* d)
  **
  ** @return
  **/
-UNS8 sendEMCY(CO_Data* d, UNS16 errCode, UNS8 errRegister, const void *Specific, UNS8 SpecificLength)
-{
+UNS8 sendEMCY(CO_Data* d, UNS16 errCode, UNS8 errRegister, const void *Specific, UNS8 SpecificLength) {
 	Message m;
   
 	MSG_WAR(0x3051, "sendEMCY", 0);
@@ -142,10 +141,8 @@ UNS8 EMCY_setError(CO_Data* d, UNS16 errCode, UNS8 errRegMask, UNS16 addInfo)
 	UNS8 index;
 	UNS8 errRegister_tmp;
 	
-	for (index = 0; index < EMCY_MAX_ERRORS; ++index)
-	{
-		if (d->error_data[index].errCode == errCode)		/* error already registered */
-		{
+	for (index = 0; index < EMCY_MAX_ERRORS; ++index) {
+		if (d->error_data[index].errCode == errCode) {		/* error already registered */
 			if (d->error_data[index].active)
 			{
 				MSG_WAR(0x3052, "EMCY message already sent", 0);

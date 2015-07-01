@@ -256,11 +256,10 @@ void GuardTimeAlarm(CO_Data* d, UNS32 id)
  * @param unused_bSubindex
  * @ingroup nodeguardo
  */
-UNS32 OnNodeGuardUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 unused_bSubindex)
-{
+UNS32 OnNodeGuardUpdate(const subindex * OD_entry, UNS16 bIndex, UNS8 bSubindex, UNS8 writeAccess) {
 #ifdef CO_ENABLE_NODE_GUARD
-  nodeguardStop(d);
-  nodeguardInit(d);
+  nodeguardStop();
+  nodeguardInit();
   return 0;
 #endif
 }
@@ -276,21 +275,21 @@ UNS32 OnNodeGuardUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 u
 ** @return
  * @ingroup heartbeato
 **/
-UNS32 OnHeartbeatProducerUpdate(CO_Data* d, const indextable * unused_indextable, UNS8 unused_bSubindex, UNS8 writeAccess) {
+UNS32 OnHeartbeatProducerUpdate(const subindex * OD_entry, UNS16 bIndex, UNS8 bSubindex, UNS8 writeAccess) {
   if(!writeAccess) return 0;
   
-  heartbeatStop(d);
-  heartbeatInit(d);
+  heartbeatStop();
+  heartbeatInit();
   return 0;
 }
 
-void heartbeatInit(CO_Data* d)
+void heartbeatInit()
 {
 
   UNS8 index; /* Index to scan the table of heartbeat consumers */
-  RegisterSetODentryCallBack(d, 0x1017, 0x00, &OnHeartbeatProducerUpdate);
+  RegisterSetODentryCallBack(&ObjDict_Data, 0x1017, 0x00, &OnHeartbeatProducerUpdate);
 
-  d->toggle = 0;
+  ObjDict_Data.toggle = 0;
 
 #ifdef CO_ENABLE_CONSUMER_HEART_BEAT
   for( index = (UNS8)0x00; index < ConsumerHeartbeatCount; index++ )
@@ -298,14 +297,14 @@ void heartbeatInit(CO_Data* d)
       TIMEVAL time = (UNS16) ( (ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF ) ;
       if ( time )
         {
-          d->ConsumerHeartBeatTimers[index] = SetAlarm(d, index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
+          ObjDict_Data->ConsumerHeartBeatTimers[index] = SetAlarm(ObjDict_Data, index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
         }
     }
 #endif
   if ( ProducerHeartBeatTime )
     {
       TIMEVAL time = ProducerHeartBeatTime;
-      d->ProducerHeartBeatTimer = SetAlarm(d, 0, &ProducerHeartbeatAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
+      ObjDict_Data.ProducerHeartBeatTimer = SetAlarm(&ObjDict_Data, 0, &ProducerHeartbeatAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
     }
 }
 
@@ -337,16 +336,16 @@ void nodeguardInit(CO_Data* d)
 #endif
 }
 
-void heartbeatStop(CO_Data* d)
+void heartbeatStop()
 {
 #ifdef CO_ENABLE_CONSUMER_HEART_BEAT
   UNS8 index;
   for( index = (UNS8)0x00; index < ConsumerHeartbeatCount; index++ )
     {
-      d->ConsumerHeartBeatTimers[index] = DelAlarm(d->ConsumerHeartBeatTimers[index]);
+      ObjDict_Data->ConsumerHeartBeatTimers[index] = DelAlarm(ObjDict_Data->ConsumerHeartBeatTimers[index]);
     }
 #endif
-  d->ProducerHeartBeatTimer = DelAlarm(d->ProducerHeartBeatTimer);
+  ObjDict_Data.ProducerHeartBeatTimer = DelAlarm(ObjDict_Data.ProducerHeartBeatTimer);
 }
 
 void nodeguardStop(CO_Data* d)
@@ -357,14 +356,14 @@ void nodeguardStop(CO_Data* d)
 
 void lifeGuardInit(CO_Data* d)
 {
-  heartbeatInit(d);
+  heartbeatInit();
   nodeguardInit(d);
 }
 
 
 void lifeGuardStop(CO_Data* d)
 {
-  heartbeatStop(d);
+  heartbeatStop();
   nodeguardStop(d);
 }
 

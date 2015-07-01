@@ -235,7 +235,9 @@ UNS8 getNodeId(CO_Data* d) {
  ** @param nodeId
  **/
 void setNodeId(CO_Data* d, UNS8 nodeId) {
-	UNS16 offset = ObjDict_firstIndex.SDO_SVR;
+  const subindex *si;
+  UNS8 si_size;
+  ODCallback_t *callbacks;
 
 #ifdef CO_ENABLE_LSS
 	d->lss_transfer.nodeID=nodeId;
@@ -250,16 +252,16 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
 		return;
 	}
 
-	if (offset) {
+	if (!(si= ObjDict_scanIndexOD(0x1200, &si_size, &callbacks))) {
 		/* Adjust COB-ID Client->Server (rx) only id already set to default value or id not valid (id==0xFF)*/
-		if ((*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject == 0x600 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
+		if ((*(UNS16*) si[1].pObject == 0x600 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
 			/* cob_id_client = 0x600 + nodeId; */
-			*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject = 0x600 + nodeId;
+			*(UNS16*) si[1].pObject = 0x600 + nodeId;
 		}
 		/* Adjust COB-ID Server -> Client (tx) only id already set to default value or id not valid (id==0xFF)*/
-		if ((*(UNS16*) ObjDict_objdict[offset].pSubindex[2].pObject == 0x580 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
+		if ((*(UNS16*) si[2].pObject == 0x580 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
 			/* cob_id_server = 0x580 + nodeId; */
-			*(UNS16*) ObjDict_objdict[offset].pSubindex[2].pObject = 0x580 + nodeId;
+			*(UNS16*) si[2].pObject = 0x580 + nodeId;
 		}
 	}
 
@@ -273,36 +275,28 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
 	 */
 	{
 		UNS8 i = 0;
-		UNS16 offset = ObjDict_firstIndex.PDO_RCV;
-		UNS16 lastIndex = ObjDict_lastIndex.PDO_RCV;
 		UNS32 cobID[] = { 0x200, 0x300, 0x400, 0x500 };
-		if (offset)
-			while ((offset <= lastIndex) && (i < 4)) {
-				if ((*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject
+			while ((si= ObjDict_scanIndexOD(0x1400+i, &si_size, &callbacks)) && (i < 4)) {
+				if ((*(UNS16*) si[1].pObject
 						== cobID[i] + *d->bDeviceNodeId)
 						|| (*d->bDeviceNodeId == 0xFF))
-					*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject = cobID[i]
+					*(UNS16*) si[1].pObject = cobID[i]
 							+ nodeId;
 				i++;
-				offset++;
 			}
 	}
 	/* ** Initialize the transmit PDO communication parameters. Only for 0x1800 to 0x1803 */
 	{
 		UNS8 i = 0;
-		UNS16 offset = ObjDict_firstIndex.PDO_TRS;
-		UNS16 lastIndex = ObjDict_lastIndex.PDO_TRS;
 		UNS32 cobID[] = { 0x180, 0x280, 0x380, 0x480 };
 		i = 0;
-		if (offset)
-			while ((offset <= lastIndex) && (i < 4)) {
-				if ((*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject
+			while ((si= ObjDict_scanIndexOD(0x1800+i, &si_size, &callbacks)) && (i < 4)) {
+				if ((*(UNS16*) si[1].pObject
 						== cobID[i] + *d->bDeviceNodeId)
 						|| (*d->bDeviceNodeId == 0xFF))
-					*(UNS16*) ObjDict_objdict[offset].pSubindex[1].pObject = cobID[i]
+					*(UNS16*) si[1].pObject = cobID[i]
 							+ nodeId;
 				i++;
-				offset++;
 			}
 	}
 

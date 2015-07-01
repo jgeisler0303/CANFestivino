@@ -50,11 +50,10 @@ typedef struct struct_CO_Data CO_Data;
 #include "lss.h"
 #endif
 
+extern CO_Data ObjDict_Data;
 extern UNS8 ObjDict_bDeviceNodeId;
 extern const indextable ObjDict_objdict[];
 extern s_PDO_status ObjDict_PDO_status[];
-extern const quick_index ObjDict_firstIndex;
-extern const quick_index ObjDict_lastIndex;
 extern const UNS16 ObjDict_ObjdictSize;
 extern const UNS8 ObjDict_iam_a_slave;
 UNS32 ObjDict_valueRangeTest (UNS8 typeValue, void * value);
@@ -74,7 +73,7 @@ extern UNS16 ObjDict_obj100;
 extern UNS32 ObjDict_obj1006;
 // #define  Sync_window_length ObjDict_obj1007
 // extern UNS32 ObjDict_obj1007;
-const indextable * ObjDict_scanIndexOD (UNS16 wIndex, UNS32 * errorCode, ODCallback_t **callbacks);
+const subindex * ObjDict_scanIndexOD (UNS16 wIndex, UNS8 *size, ODCallback_t **callbacks);
 #define error_number ObjDict_highestSubIndex_obj1003
 extern UNS8 ObjDict_highestSubIndex_obj1003;
 #define error_first_element ObjDict_obj1003

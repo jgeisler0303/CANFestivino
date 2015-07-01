@@ -124,14 +124,14 @@ e_nodeState getNodeState (CO_Data* d, UNS8 nodeId);
  * @param *d Pointer on a CAN object data structure
  * @ingroup heartbeato
  */
-void heartbeatInit(CO_Data* d);
+void heartbeatInit();
 
 /** 
  * @brief Stop heartbeat consumer and producer
  * @param *d Pointer on a CAN object data structure
  * @ingroup heartbeato
  */
-void heartbeatStop(CO_Data* d);
+void heartbeatStop();
 
 /** 
  * @brief This function is responsible to process a canopen-message which seams to be an NMT Error Control
