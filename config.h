@@ -1,29 +1,28 @@
 /*
-This file is part of CanFestival, a library implementing CanOpen Stack.
+ This file is part of CanFestival, a library implementing CanOpen Stack.
 
-Copyright (C): Edouard TISSERANT and Francis DUPIN
-AVR Port: Andreas GLAUSER and Peter CHRISTEN
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
+ AVR Port: Andreas GLAUSER and Peter CHRISTEN
 
-See COPYING file for copyrights details.
+ See COPYING file for copyrights details.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
-
 
 #ifdef  __IAR_SYSTEMS_ICC__
 #include <ioavr.h>
@@ -68,6 +67,5 @@ repeat repeat repeat repeat repeat repeat repeat repeat repeat repeat repeat rep
 #define EMCY_MAX_ERRORS 4
 #define REPEAT_EMCY_MAX_ERRORS_TIMES(repeat)\
 repeat repeat repeat repeat 
-
 
 #endif /* _CONFIG_H_ */

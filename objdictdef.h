@@ -1,24 +1,24 @@
 /*
-This file is part of CanFestival, a library implementing CanOpen Stack. 
+ This file is part of CanFestival, a library implementing CanOpen Stack. 
 
-Copyright (C): Edouard TISSERANT and Francis DUPIN
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
 
-See COPYING file for copyrights details.
+ See COPYING file for copyrights details.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #ifndef __objdictdef_h__
 #define __objdictdef_h__
@@ -66,7 +66,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  value range (See how it works in objdict.c)
  */
 
-
 /** Each entry of the object dictionary can be READONLY (RO), READ/WRITE (RW),
  *  WRITE-ONLY (WO)
  */
@@ -81,35 +80,32 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /** This are some structs which are neccessary for creating the entries
  *  of the object dictionary.
  */
-typedef struct td_subindex
-{
-    UNS8                    bAccessType:2;
-    UNS8                    bDataType:6; /* Defines of what datatype the entry is */
+typedef struct td_subindex {
+    UNS8 bAccessType :2;
+    UNS8 bDataType :6; /* Defines of what datatype the entry is */
     //UNS8                   size;      /* The size (in Byte) of the variable */
-    void*                   pObject;   /* This is the pointer of the Variable */
-} __attribute__ ((packed)) subindex;
+    void* pObject; /* This is the pointer of the Variable */
+}__attribute__ ((packed)) subindex;
 
 /** Struct for creating entries in the communictaion profile
  */
-typedef struct td_indextable
-{
-    subindex*   pSubindex;   /* Pointer to the subindex */
-    UNS8   bSubCount;   /* the count of valid entries for this subindex
-                         * This count here defines how many memory has been
-                         * allocated. this memory does not have to be used.
-                         */
+typedef struct td_indextable {
+    subindex* pSubindex; /* Pointer to the subindex */
+    UNS8 bSubCount; /* the count of valid entries for this subindex
+     * This count here defines how many memory has been
+     * allocated. this memory does not have to be used.
+     */
     //UNS16   index;
 } indextable;
 
-typedef struct s_quick_index{
-	UNS16 SDO_SVR;
-	UNS16 SDO_CLT;
-	UNS16 PDO_RCV;
-	UNS16 PDO_RCV_MAP;
-	UNS16 PDO_TRS;
-	UNS16 PDO_TRS_MAP;
-}quick_index;
-
+typedef struct s_quick_index {
+    UNS16 SDO_SVR;
+    UNS16 SDO_CLT;
+    UNS16 PDO_RCV;
+    UNS16 PDO_RCV_MAP;
+    UNS16 PDO_TRS;
+    UNS16 PDO_TRS_MAP;
+} quick_index;
 
 /*typedef struct struct_CO_Data CO_Data; */
 typedef UNS32 (*ODCallback_t)(const subindex * OD_entry, UNS16 bIndex, UNS8 bSubindex, UNS8 writeAccess);

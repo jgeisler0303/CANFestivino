@@ -1,31 +1,31 @@
 /*
-This file is part of CanFestival, a library implementing CanOpen Stack. 
+ This file is part of CanFestival, a library implementing CanOpen Stack. 
 
-Copyright (C): Edouard TISSERANT and Francis DUPIN
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
 
-See COPYING file for copyrights details.
+ See COPYING file for copyrights details.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 /** @defgroup pdo Process Data Object (PDO)
  *  PDO is a communication object defined by the DPO communication parameter and PDA mapping parameter objects.
  *  It is an uncomfirmed communication service without protocol overhead.
  *  @ingroup comobj
  */
- 
+
 #ifndef __pdo_h__
 #define __pdo_h__
 
@@ -40,18 +40,14 @@ typedef struct struct_s_PDO_status s_PDO_status;
 
 /* Handler for RxPDO event timers : empty function that user can overload */
 // void _RxPDO_EventTimers_Handler(CO_Data *d, UNS32 pdoNum);
-
 /* Status of the TPDO : */
 #define PDO_INHIBITED 0x01
 #define PDO_RTR_SYNC_READY 0x01
 
 /** The PDO structure */
 struct struct_s_PDO_status {
-  UNS8 transmit_type_parameter;
-  TIMER_HANDLE event_timer;
-  TIMER_HANDLE inhibit_timer;
-  Message last_message;
-  UNS8 event_trigger;
+    UNS8 transmit_type_parameter;TIMER_HANDLE event_timer;TIMER_HANDLE inhibit_timer;
+    Message last_message;UNS8 event_trigger;
 };
 
 #define s_PDO_status_Initializer {0, TIMER_NONE, TIMER_NONE, Message_Initializer, 0}
@@ -91,7 +87,7 @@ UNS8 buildPDO(CO_Data* d, UNS8 numPdo, Message *pdo);
  
  * @return 0xFF if error, other in success.
  */
-UNS8 sendPDOrequest( CO_Data* d, UNS16 RPDOIndex );
+UNS8 sendPDOrequest(CO_Data* d, UNS16 RPDOIndex);
 
 /**
  * @brief Compute a PDO frame reception
@@ -100,7 +96,7 @@ UNS8 sendPDOrequest( CO_Data* d, UNS16 RPDOIndex );
  * @param *m Pointer on a CAN message structure
  * @return 0xFF if error, else return 0
  */
-UNS8 proceedPDO (CO_Data* d, Message *m);
+UNS8 proceedPDO(CO_Data* d, Message *m);
 
 /** 
  * @brief Used by the application to signal changes in process data
@@ -110,8 +106,8 @@ UNS8 proceedPDO (CO_Data* d, Message *m);
  * type and content change before sending it.    
  * @param *d Pointer on a CAN object data structure
  */
-UNS8 sendPDOevent (CO_Data* d);
-UNS8 sendOnePDOevent (CO_Data* d, UNS8 pdoNum);
+UNS8 sendPDOevent(CO_Data* d);
+UNS8 sendOnePDOevent(CO_Data* d, UNS8 pdoNum);
 
 /** 
  * @ingroup pdo

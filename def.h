@@ -1,25 +1,24 @@
 /*
-This file is part of CanFestival, a library implementing CanOpen Stack. 
+ This file is part of CanFestival, a library implementing CanOpen Stack. 
 
-Copyright (C): Edouard TISSERANT and Francis DUPIN
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
 
-See COPYING file for copyrights details.
+ See COPYING file for copyrights details.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
-
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #ifndef __def_h__
 #define __def_h__
@@ -49,8 +48,8 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 /******************** CONSTANTS ****************/
 
 /** Constantes which permit to define if a PDO frame
-   is a request one or a data one
-*/
+ is a request one or a data one
+ */
 /* Should not be modified */
 #define REQUEST 1
 #define NOT_A_REQUEST 0
@@ -66,7 +65,7 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #ifndef FALSE
 #define FALSE 0
 #endif
-    
+
 /** Status of the SDO transmission
  */
 #define SDO_RESET                0x0      /* Transmission not started. Init state. */
@@ -125,9 +124,9 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 #define SDO_BSS_DOWNLOAD_RESPONSE          2
 
 /*  Function Codes 
-   ---------------
-  defined in the canopen DS301 
-*/
+ ---------------
+ defined in the canopen DS301 
+ */
 #define NMT	   0x0
 #define SYNC       0x1
 #define TIME_STAMP 0x2

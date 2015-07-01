@@ -1,24 +1,24 @@
 /*
-This file is part of CanFestival, a library implementing CanOpen Stack. 
+ This file is part of CanFestival, a library implementing CanOpen Stack. 
 
-Copyright (C): Edouard TISSERANT and Francis DUPIN
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
 
-See COPYING file for copyrights details.
+ See COPYING file for copyrights details.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #ifndef __data_h__
 #define __data_h__
@@ -32,7 +32,6 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 typedef struct struct_CO_Data CO_Data;
 
-
 #include "applicfg.h"
 #include "def.h"
 #include "can.h"
@@ -44,7 +43,6 @@ typedef struct struct_CO_Data CO_Data;
 #include "lifegrd.h"
 #include "sync.h"
 #include "nmtSlave.h"
-#include "nmtMaster.h"
 #include "emcy.h"
 #ifdef CO_ENABLE_LSS
 #include "lss.h"
@@ -56,7 +54,7 @@ extern const indextable ObjDict_objdict[];
 extern s_PDO_status ObjDict_PDO_status[];
 extern const UNS16 ObjDict_ObjdictSize;
 extern const UNS8 ObjDict_iam_a_slave;
-UNS32 ObjDict_valueRangeTest (UNS8 typeValue, void * value);
+UNS32 ObjDict_valueRangeTest(UNS8 typeValue, void * value);
 #define ConsumerHeartbeatCount ObjDict_highestSubIndex_obj1016
 extern UNS8 ObjDict_highestSubIndex_obj1016;
 #define ConsumerHeartbeatEntries ObjDict_obj1016
@@ -73,7 +71,7 @@ extern UNS16 ObjDict_obj100;
 extern UNS32 ObjDict_obj1006;
 // #define  Sync_window_length ObjDict_obj1007
 // extern UNS32 ObjDict_obj1007;
-const subindex * ObjDict_scanIndexOD (UNS16 wIndex, UNS8 *size, ODCallback_t **callbacks);
+const subindex * ObjDict_scanIndexOD(UNS16 wIndex, UNS8 *size, ODCallback_t **callbacks);
 #define error_number ObjDict_highestSubIndex_obj1003
 extern UNS8 ObjDict_highestSubIndex_obj1003;
 #define error_first_element ObjDict_obj1003
@@ -83,111 +81,108 @@ extern UNS8 ObjDict_obj1001;
 #define error_cobid ObjDict_obj1014
 extern UNS16 ObjDict_obj1014;
 
-
 /**
  * @ingroup od
  * @brief This structure contains all necessary informations to define a CANOpen node 
  */
 struct struct_CO_Data {
-	/* Object dictionary */
-	// UNS8 *bDeviceNodeId;
-	// const indextable *objdict;
-	// s_PDO_status *PDO_status;
-	UNS8 currentPDO;
-	// TIMER_HANDLE *RxPDO_EventTimers;
-	// void (*RxPDO_EventTimers_Handler)(CO_Data*, UNS32);
-	// const quick_index *firstIndex;
-	// const quick_index *lastIndex;
-	// const UNS16 *ObjdictSize;
-	// const UNS8 *iam_a_slave;
-	// valueRangeTest_t valueRangeTest;
-	
-	/* SDO */
-	s_transfer transfers[SDO_MAX_SIMULTANEOUS_TRANSFERS];
-	/* s_sdo_parameter *sdo_parameters; */
+    /* Object dictionary */
+    // UNS8 *bDeviceNodeId;
+    // const indextable *objdict;
+    // s_PDO_status *PDO_status;
+    UNS8 currentPDO;
+    // TIMER_HANDLE *RxPDO_EventTimers;
+    // void (*RxPDO_EventTimers_Handler)(CO_Data*, UNS32);
+    // const quick_index *firstIndex;
+    // const quick_index *lastIndex;
+    // const UNS16 *ObjdictSize;
+    // const UNS8 *iam_a_slave;
+    // valueRangeTest_t valueRangeTest;
 
-	/* State machine */
-	e_nodeState nodeState;
-	s_state_communication CurrentCommunicationState;
-	// initialisation_t initialisation;
-	// preOperational_t preOperational;
-	// operational_t operational;
-	// stopped_t stopped;
-     // void (*NMT_Slave_Node_Reset_Callback)(CO_Data*);
-     // void (*NMT_Slave_Communications_Reset_Callback)(CO_Data*);
-     
-	/* NMT-heartbeat */
-	// UNS8 *ConsumerHeartbeatCount;
-	// UNS32 *ConsumerHeartbeatEntries;
-	// TIMER_HANDLE *ConsumerHeartBeatTimers;
-	// UNS16 *ProducerHeartBeatTime;
-	TIMER_HANDLE ProducerHeartBeatTimer;
-	heartbeatError_t heartbeatError;
+    /* SDO */
+    s_transfer transfers[SDO_MAX_SIMULTANEOUS_TRANSFERS];
+    /* s_sdo_parameter *sdo_parameters; */
+
+    /* State machine */
+    e_nodeState nodeState;
+    s_state_communication CurrentCommunicationState;
+    // initialisation_t initialisation;
+    // preOperational_t preOperational;
+    // operational_t operational;
+    // stopped_t stopped;
+    // void (*NMT_Slave_Node_Reset_Callback)(CO_Data*);
+    // void (*NMT_Slave_Communications_Reset_Callback)(CO_Data*);
+
+    /* NMT-heartbeat */
+    // UNS8 *ConsumerHeartbeatCount;
+    // UNS32 *ConsumerHeartbeatEntries;
+    // TIMER_HANDLE *ConsumerHeartBeatTimers;
+    // UNS16 *ProducerHeartBeatTime;
+    TIMER_HANDLE ProducerHeartBeatTimer;
+    heartbeatError_t heartbeatError;
 #if defined CO_ENABLE_CONSUMER_HEART_BEAT || defined CO_ENABLE_NODE_GUARD
-	e_nodeState NMTable[NMT_MAX_NODE_ID]; 
+    e_nodeState NMTable[NMT_MAX_NODE_ID];
 #endif
-	/* NMT-nodeguarding */
-	TIMER_HANDLE GuardTimeTimer;
-	// TIMER_HANDLE LifeTimeTimer;
-	nodeguardError_t nodeguardError;
-	// UNS16 *GuardTime;
-	// UNS8 *LifeTimeFactor;
+    /* NMT-nodeguarding */
+    TIMER_HANDLE GuardTimeTimer;
+    // TIMER_HANDLE LifeTimeTimer;
+    nodeguardError_t nodeguardError;
+    // UNS16 *GuardTime;
+    // UNS8 *LifeTimeFactor;
 #ifdef CO_ENABLE_NODE_GUARD
-	UNS8 nodeGuardStatus[NMT_MAX_NODE_ID];
+    UNS8 nodeGuardStatus[NMT_MAX_NODE_ID];
 #endif
-	/* SYNC */
-	TIMER_HANDLE syncTimer;
-	// UNS16 *COB_ID_Sync;
-	// UNS32 *Sync_Cycle_Period;
-	/*UNS32 *Sync_window_length;;*/
-	post_sync_t post_sync;
-	post_TPDO_t post_TPDO;
-	// post_SlaveBootup_t post_SlaveBootup;
+    /* SYNC */
+    TIMER_HANDLE syncTimer;
+    // UNS16 *COB_ID_Sync;
+    // UNS32 *Sync_Cycle_Period;
+    /*UNS32 *Sync_window_length;;*/
+    post_sync_t post_sync;
+    post_TPDO_t post_TPDO;
+    // post_SlaveBootup_t post_SlaveBootup;
     post_SlaveStateChange_t post_SlaveStateChange;
-	
-	/* General */
-	UNS8 toggle;
-	// CAN_PORT canHandle;	
-	// scanIndexOD_t scanIndexOD;
-	// storeODSubIndex_t storeODSubIndex; 
-	
-	/* DCF concise */
+
+    /* General */
+    UNS8 toggle;
+    // CAN_PORT canHandle;	
+    // scanIndexOD_t scanIndexOD;
+    // storeODSubIndex_t storeODSubIndex; 
+
+    /* DCF concise */
 // 	const indextable* dcf_odentry;
 // 	UNS8* dcf_cursor;
 // 	UNS32 dcf_entries_count;
 // 	UNS8 dcf_status;
 // 	UNS32 dcf_size;
 // 	UNS8* dcf_data;
-	
-	/* EMCY */
-	e_errorState error_state;
-	UNS8 error_history_size;
+    /* EMCY */
+    e_errorState error_state;UNS8 error_history_size;
 // 	UNS8* error_number;
 // 	UNS32* error_first_element;
 // 	UNS8* error_register;
 // 	UNS16* error_cobid;
-	s_errors error_data[EMCY_MAX_ERRORS];
+    s_errors error_data[EMCY_MAX_ERRORS];
 // 	post_emcy_t post_emcy;
-	
+
 #ifdef CO_ENABLE_LSS
-	/* LSS */
-	lss_transfer_t lss_transfer;
-	lss_StoreConfiguration_t lss_StoreConfiguration;
+    /* LSS */
+    lss_transfer_t lss_transfer;
+    lss_StoreConfiguration_t lss_StoreConfiguration;
 #endif	
 };
 
 #define NMTable_Initializer Unknown_state,
 #if defined CO_ENABLE_CONSUMER_HEART_BEAT || defined CO_ENABLE_NODE_GUARD
-  #define NMTable_Array_Initializer {REPEAT_NMT_MAX_NODE_ID_TIMES(NMTable_Initializer)}, /* is  well initialized at "Unknown_state". Is it ok ? (FD)*/
+#define NMTable_Array_Initializer {REPEAT_NMT_MAX_NODE_ID_TIMES(NMTable_Initializer)}, /* is  well initialized at "Unknown_state". Is it ok ? (FD)*/
 #else
-  #define NMTable_Array_Initializer
+#define NMTable_Array_Initializer
 #endif
 
 #define nodeGuardStatus_Initializer 0x00,
 #ifdef CO_ENABLE_NODE_GUARD
-  #define nodeGuardStatus_Array_Initializer {REPEAT_NMT_MAX_NODE_ID_TIMES(nodeGuardStatus_Initializer)},
+#define nodeGuardStatus_Array_Initializer {REPEAT_NMT_MAX_NODE_ID_TIMES(nodeGuardStatus_Initializer)},
 #else
-  #define nodeGuardStatus_Array_Initializer 
+#define nodeGuardStatus_Array_Initializer 
 #endif
 
 #ifdef SDO_DYNAMIC_BUFFER_ALLOCATION
@@ -250,7 +245,7 @@ struct struct_CO_Data {
 	0, /* errRegMask */\
 	0 /* active */\
 	},
-	
+
 #ifdef CO_ENABLE_LSS
 
 #ifdef CO_ENABLE_LSS_FS	
@@ -290,7 +285,6 @@ struct struct_CO_Data {
 #else
 #define lss_Initializer
 #endif
-
 
 /* A macro to initialize the data in client app.*/
 /* CO_Data structure */
@@ -394,5 +388,4 @@ struct struct_CO_Data {
 // #endif
 
 #endif /* __data_h__ */
-
 

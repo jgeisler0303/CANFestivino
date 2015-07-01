@@ -1,24 +1,24 @@
 /*
-This file is part of CanFestival, a library implementing CanOpen Stack. 
+ This file is part of CanFestival, a library implementing CanOpen Stack. 
 
-Copyright (C): Edouard TISSERANT and Francis DUPIN
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
 
-See COPYING file for copyrights details.
+ See COPYING file for copyrights details.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 /** @defgroup heartbeato Heartbeat Object
  *  The heartbeat mechanism for a device is established through cyclically transmitting a message by a
@@ -38,20 +38,19 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
  * @todo The implementation is very basic. The toggle bit of the nodes confirmation is not checked at the moment
  */
-	
+
 /**
-** @file   lifegrd.h
-** @author Markus WILDBOLZ
-** @date   Mon Oct 01 14:44:36 CEST 2012 
-**
-** @brief
-**
-**
-*/
-				 
+ ** @file   lifegrd.h
+ ** @author Markus WILDBOLZ
+ ** @date   Mon Oct 01 14:44:36 CEST 2012 
+ **
+ ** @brief
+ **
+ **
+ */
+
 #ifndef __lifegrd_h__
 #define __lifegrd_h__
-
 
 #include "applicfg.h"
 
@@ -115,7 +114,7 @@ void lifeGuardStop(CO_Data* d);
  * @param nodeId Id of a node
  * @return e_nodeState State of the node corresponding to the nodeId
  */
-e_nodeState getNodeState (CO_Data* d, UNS8 nodeId);
+e_nodeState getNodeState(CO_Data* d, UNS8 nodeId);
 
 /** 
  * @brief Start heartbeat consumer and producer
@@ -141,7 +140,6 @@ void heartbeatStop();
  * @param *m Pointer on the CAN-message which has to be analysed.
  * @ingroup nodeguardo
  */
-void proceedNODE_GUARD (CO_Data* d, Message* m);
-
+void proceedNODE_GUARD(CO_Data* d, Message* m);
 
 #endif /*__lifegrd_h__ */

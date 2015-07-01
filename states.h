@@ -1,29 +1,29 @@
 /*
-This file is part of CanFestival, a library implementing CanOpen Stack. 
+ This file is part of CanFestival, a library implementing CanOpen Stack. 
 
-Copyright (C): Edouard TISSERANT and Francis DUPIN
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
 
-See COPYING file for copyrights details.
+ See COPYING file for copyrights details.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 /** @defgroup statemachine State Machine
  *  @ingroup userapi
  */
- 
+
 #ifndef __states_h__
 #define __states_h__
 
@@ -37,27 +37,20 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  * */
 /* Should not be modified */
 enum enum_nodeState {
-  Initialisation  = 0x00, 
-  Disconnected    = 0x01,
-  Connecting      = 0x02,
-  Preparing       = 0x02,
-  Stopped         = 0x04,
-  Operational     = 0x05,
-  Pre_operational = 0x7F,
-  Unknown_state   = 0x0F
-} __attribute__ ((packed)) ;
+    Initialisation = 0x00,
+    Disconnected = 0x01,
+    Connecting = 0x02,
+    Preparing = 0x02,
+    Stopped = 0x04,
+    Operational = 0x05,
+    Pre_operational = 0x7F,
+    Unknown_state = 0x0F
+}__attribute__ ((packed));
 
 typedef enum enum_nodeState e_nodeState;
 
-typedef struct
-{
-	INTEGER8 csBoot_Up : 1;
-	INTEGER8 csSDO : 1;
-	INTEGER8 csEmergency : 1;
-	INTEGER8 csSYNC : 1;
-	INTEGER8 csLifeGuard : 1;
-	INTEGER8 csPDO : 1;
-	INTEGER8 csLSS : 1;
+typedef struct {
+    INTEGER8 csBoot_Up :1;INTEGER8 csSDO :1;INTEGER8 csEmergency :1;INTEGER8 csSYNC :1;INTEGER8 csLifeGuard :1;INTEGER8 csPDO :1;INTEGER8 csLSS :1;
 } s_state_communication;
 
 /** 
@@ -75,28 +68,24 @@ typedef void (*stopped_t)(CO_Data*);
  * @param *d Pointer on a CAN object data structure
  */
 // void _initialisation(CO_Data* d);
-
 /** 
  * @ingroup statemachine
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
 // void _preOperational(CO_Data* d);
-
 /**
  * @ingroup statemachine 
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
 // void _operational(CO_Data* d);
-
 /** 
  * @ingroup statemachine
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
 // void _stopped(CO_Data* d);
-
 #include "data.h"
 
 /************************* prototypes ******************************/
@@ -114,7 +103,7 @@ void canDispatch(CO_Data* d, Message *m);
  * @param *d Pointer on a CAN object data structure
  * @return The node state
  */
-e_nodeState getState (CO_Data* d);
+e_nodeState getState(CO_Data* d);
 
 /** 
  * @ingroup statemachine
@@ -123,7 +112,7 @@ e_nodeState getState (CO_Data* d);
  * @param newState The state to assign
  * @return 
  */
-UNS8 setState (CO_Data* d, e_nodeState newState);
+UNS8 setState(CO_Data* d, e_nodeState newState);
 
 /**
  * @ingroup statemachine 
@@ -131,7 +120,7 @@ UNS8 setState (CO_Data* d, e_nodeState newState);
  * @param *d Pointer on a CAN object data structure
  * @return
  */
-UNS8 getNodeId (CO_Data* d);
+UNS8 getNodeId(CO_Data* d);
 
 #ifdef CO_ENABLE_CHANGE_NODE_ID
 /** 
@@ -147,6 +136,6 @@ void setNodeId (CO_Data* d, UNS8 nodeId);
  * @brief Some stuff to do when the node enter in pre-operational mode
  * @param *d Pointer on a CAN object data structure
  */
-void initPreOperationalMode (CO_Data* d);
+void initPreOperationalMode(CO_Data* d);
 
 #endif

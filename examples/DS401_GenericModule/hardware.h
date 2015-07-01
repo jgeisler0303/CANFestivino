@@ -1,36 +1,36 @@
 /*
-This file is part of CanFestival, a library implementing CanOpen Stack.
+ This file is part of CanFestival, a library implementing CanOpen Stack.
 
-Copyright (C): Edouard TISSERANT and Francis DUPIN
-AVR Port: Andreas GLAUSER and Peter CHRISTEN
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
+ AVR Port: Andreas GLAUSER and Peter CHRISTEN
 
-See COPYING file for copyrights details.
+ See COPYING file for copyrights details.
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 /******************************************************************************
-MCU ports and Bits
-Makros for access on hardware
-******************************************************************************/
+ MCU ports and Bits
+ Makros for access on hardware
+ ******************************************************************************/
 
 #ifndef _HARDWARE_INCLUDED
 #define _HARDWARE_INCLUDED
 
 /******************************************************************************
-Makros for bit access on the ports and registers
-******************************************************************************/
+ Makros for bit access on the ports and registers
+ ******************************************************************************/
 // Macros for set and clear bits in I/O registers
 #define setbit(address,bit) ((address) |= (1<<(bit)))
 #define clearbit(address,bit) ((address) &= ~(1<<(bit)))
@@ -50,5 +50,4 @@ Makros for bit access on the ports and registers
 #define set_outputs(val)	PORTD = ((PORTD & ~OUTPUT_MASK) | ((~(val>>3)) & OUTPUT_MASK))
 
 #endif	// _HARDWARE_INCLUDED
-
 
