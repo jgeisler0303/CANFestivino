@@ -41,10 +41,6 @@
 
 #include "applicfg.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 typedef UNS32 (*valueRangeTest_t)(UNS8 typeValue, void *Value);
 typedef void (*storeODSubIndex_t)(CO_Data* d, UNS16 wIndex, UNS8 bSubindex);
 // void _storeODSubIndex (CO_Data* d, UNS16 wIndex, UNS8 bSubindex);
@@ -260,10 +256,6 @@ UNS8 endianize);
 #define writeLocalDict( d, wIndex, bSubindex, pSourceData, pExpectedSize, checkAccess) \
        _setODentry( d, wIndex, bSubindex, pSourceData, pExpectedSize, checkAccess, 0)
 
-UNS32 RegisterSetODentryCallBack(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, ODCallback_t Callback);
-
-#ifdef __cplusplus
-}
-#endif
+UNS32 RegisterSetODentryCallBack(CO_Data* ObjDict_Data, UNS16 wIndex, UNS8 bSubindex, ODCallback_t Callback);
 
 #endif /* __objacces_h__ */

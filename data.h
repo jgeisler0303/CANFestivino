@@ -23,10 +23,6 @@
 #ifndef __data_h__
 #define __data_h__
 
-// #ifdef __cplusplus
-// extern "C" {
-// #endif
-
 /* declaration of CO_Data type let us include all necessary headers
  struct struct_CO_Data can then be defined later
  */

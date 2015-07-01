@@ -38,6 +38,5 @@ typedef struct {
 
 #define Message_Initializer {0,0,0,{0,0,0,0,0,0,0,0}}
 
-typedef UNS8 (*canSend_t)(Message *);
 
 #endif /* __can_h__ */
