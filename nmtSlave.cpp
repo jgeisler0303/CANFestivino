@@ -32,7 +32,6 @@
  */
 #include "nmtSlave.h"
 #include "states.h"
-#include "canfestival.h"
 #include "sysdep.h"
 
 /*!
@@ -74,7 +73,7 @@ void proceedNMTstateChange(CO_Data* d, Message *m) {
                     break;
 
                 case NMT_Reset_Comunication: {
-                    UNS8 currentNodeId = getNodeId(d);
+//                    UNS8 currentNodeId = getNodeId(d);
 
 //             if(d->NMT_Slave_Communications_Reset_Callback != NULL)
 //                d->NMT_Slave_Communications_Reset_Callback(d);

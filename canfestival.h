@@ -26,10 +26,97 @@
 
 #include "applicfg.h"
 #include "data.h"
+#include "CO_timer.h"
+#include "objacces.h"
+#include "digitalWriteFast.h"
+#include "CO_ErrorState.h"
+
 
 // ---------  to be called by user app ---------
-void initTimer(void);
-UNS8 canSend(Message *m);
-UNS8 canChangeBaudRate(CAN_PORT port, char* baud);
+
+template<const int redLEDPin, const int greenLEDPin> class CO {
+public:
+    CO() :
+            m(Message_Initializer) {
+    }
+    ;
+    void CO_Cycle();
+    void CO_Init();
+
+private:
+    static void errorStateBlink(uint8_t dummy);
+
+    Message m;
+};
+
+template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::CO_Init() {
+    if(redLEDPin>0) pinModeFast(redLEDPin, OUTPUT);
+    if(greenLEDPin>0) pinModeFast(greenLEDPin, OUTPUT);
+    if(redLEDPin>0) digitalWriteFast(redLEDPin, 1);
+    if(greenLEDPin>0) digitalWriteFast(greenLEDPin, 1);
+
+    initCAN();
+
+    setState(&ObjDict_Data, Initialisation);
+
+    SetAlarm(0, &errorStateBlink, 62, 62);
+
+    if(redLEDPin>0) digitalWriteFast(redLEDPin, 0);
+    if(greenLEDPin>0) digitalWriteFast(greenLEDPin, 0);
+}
+
+template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::CO_Cycle() {
+    TimeDispatch();
+
+    if (CAN.checkReceive()) {
+        CAN.readMsgBuf(&(m.len), m.data);
+        m.cob_id = CAN.getCanId();
+        m.rtr = 0; // m_nRtr;
+
+        if (isRxNoError())
+            flashGreen();
+        canDispatch(&ObjDict_Data, &m);         // process it
+    }
+
+    uint8_t ef = CAN.errorFlag();
+    if (ef & MCP_CAN::EFlg_TxWar)
+        setTxErrorState(tx_warning);
+
+    if (ef & MCP_CAN::EFlg_TxBusOff) {
+        setTxErrorState(tx_bus_off);
+    } else if (ef & MCP_CAN::EFlg_TxEP)
+        setTxErrorState(tx_passive);
+    else if (!isTxNoError()) {
+        if (CAN.checkTransmit())
+            resetTxErrorState();
+    }
+    updateTxErrorState();
+
+    if (ef && MCP_CAN::EFlg_RxWar)
+        setRxErrorState(rx_warning);
+
+    if (ef & (MCP_CAN::EFlg_Rx1Ovr | MCP_CAN::EFlg_Rx0Ovr))
+        setRxErrorState(rx_overflow);
+    else if (ef && MCP_CAN::EFlg_RxEP)
+        setRxErrorState(rx_passive);
+    else if (greePatternStarted())
+        resetRxErrorState();
+
+    updateRxErrorState();
+}
+
+template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::errorStateBlink(uint8_t dummy) {
+    if(nextRedBlinkState()) {
+        if(redLEDPin>0) digitalWriteFast(redLEDPin, 1);
+    } else {
+        if(redLEDPin>0) digitalWriteFast(redLEDPin, 0);
+    }
+
+    if(nextGreenBlinkState()) {
+        if(greenLEDPin>0) digitalWriteFast(greenLEDPin, 1);
+    } else {
+        if(greenLEDPin>0) digitalWriteFast(greenLEDPin, 0);
+    }
+}
 
 #endif

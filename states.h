@@ -28,6 +28,7 @@
 #define __states_h__
 
 #include "applicfg.h"
+#include "CO_can.h"
 
 /* The nodes states 
  * -----------------
@@ -52,6 +53,9 @@ typedef enum enum_nodeState e_nodeState;
 typedef struct {
     INTEGER8 csBoot_Up :1;INTEGER8 csSDO :1;INTEGER8 csEmergency :1;INTEGER8 csSYNC :1;INTEGER8 csLifeGuard :1;INTEGER8 csPDO :1;INTEGER8 csLSS :1;
 } s_state_communication;
+
+// TODO: ugly circle include
+#include "data.h"
 
 /** 
  * @brief Function that user app can overload
@@ -86,7 +90,6 @@ typedef void (*stopped_t)(CO_Data*);
  * @param *d Pointer on a CAN object data structure
  */
 // void _stopped(CO_Data* d);
-#include "data.h"
 
 /************************* prototypes ******************************/
 

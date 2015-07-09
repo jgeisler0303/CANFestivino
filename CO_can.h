@@ -1,7 +1,7 @@
 /*
- This file is part of CanFestival, a library implementing CanOpen Stack.
+ This file is part of CanFestival, a library implementing CanOpen Stack. 
 
- Copyright (C): Andreas GLAUSER
+ Copyright (C): Edouard TISSERANT and Francis DUPIN
 
  See COPYING file for copyrights details.
 
@@ -20,21 +20,28 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-// DS 401 Digital IO handling according DS 401 V2.1 "Device Profile for Generic I/O Modules"
-#ifndef __DS_401_h__
-#define __DS_401_h__
+#ifndef __can_h__
+#define __can_h__
 
-// Includes for the Canfestival
-#include "canfestival.h"
-#include "timer.h"
-#include "ObjDict.h"
+#include "applicfg.h"
+#include "mcp_can.h"
 
-unsigned char digital_input_handler(CO_Data* d, unsigned char *newInput, unsigned char size);
+/** 
+ * @brief The CAN message structure 
+ * @ingroup can
+ */
+typedef struct {
+    UNS16 cob_id; /**< message's ID */
+    UNS8 rtr; /**< remote transmission request. (0 if not rtr message, 1 if rtr message) */
+    UNS8 len; /**< message's length (0 to 8) */
+    UNS8 data[8]; /**< message's datas */
+} Message;
 
-unsigned char digital_output_handler(CO_Data* d, unsigned char *newOuput, unsigned char size);
+#define Message_Initializer {0,0,0,{0,0,0,0,0,0,0,0}}
 
-unsigned char analog_input_handler(CO_Data* d, unsigned int *newInput, unsigned char size);
+extern MCP_CAN CAN;
 
-unsigned char analog_output_handler(CO_Data* d, unsigned int *newOutput, unsigned char size);
+UNS8 canSend(Message *m);
+void initCAN();
 
-#endif //__DS_401_h__
+#endif /* __can_h__ */

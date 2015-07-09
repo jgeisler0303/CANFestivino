@@ -57,8 +57,6 @@
 // CANOPEN_BIG_ENDIAN is not defined
 #define CANOPEN_LITTLE_ENDIAN 1
 
-#define US_TO_TIMEVAL_FACTOR 4
-
 #define REPEAT_SDO_MAX_SIMULTANEOUS_TRANSFERS_TIMES(repeat)\
 repeat
 #define REPEAT_NMT_MAX_NODE_ID_TIMES(repeat)\

@@ -34,7 +34,10 @@
 
 #include <stdlib.h>
 
-#include "canfestival.h"
+#include "applicfg.h"
+#include "data.h"
+#include "CO_timer.h"
+#include "objacces.h"
 #include "sysdep.h"
 
 /* Uncomment if your compiler does not support inline functions */
@@ -132,13 +135,13 @@ UNS8 dataType, SDOCallback_t Callback, UNS8 useBlockMode);
  ** @param d
  ** @param id
  **/
-void SDOTimeoutAlarm(CO_Data* d, UNS32 id) {
+void SDOTimeoutAlarm(UNS8 id) {
     UNS8 nodeId;
     const subindex *si;
     UNS8 si_size;
     ODCallback_t *callbacks;
     /* Get the client->server cobid.*/
-    if (!(si = ObjDict_scanIndexOD(0x1280 + d->transfers[id].CliServNbr, &si_size, &callbacks))) {
+    if (!(si = ObjDict_scanIndexOD(0x1280 + ObjDict_Data.transfers[id].CliServNbr, &si_size, &callbacks))) {
         return;
     }
     nodeId = (UNS8) *((UNS8*) si[3].pObject);
@@ -147,29 +150,29 @@ void SDOTimeoutAlarm(CO_Data* d, UNS32 id) {
     MSG_WAR(0x2A02, "         index : ", d->transfers[id].index);
     MSG_WAR(0x2A02, "      subIndex : ", d->transfers[id].subIndex);
     /* Reset timer handler */
-    d->transfers[id].timer = TIMER_NONE;
+    ObjDict_Data.transfers[id].timer = TIMER_NONE;
     /*Set aborted state*/
-    d->transfers[id].state = SDO_ABORTED_INTERNAL;
+    ObjDict_Data.transfers[id].state = SDO_ABORTED_INTERNAL;
     /* Sending a SDO abort */
-    sendSDOabort(d, d->transfers[id].whoami, d->transfers[id].CliServNbr, d->transfers[id].index, d->transfers[id].subIndex, SDOABT_TIMED_OUT);
-    d->transfers[id].abortCode = SDOABT_TIMED_OUT;
+    sendSDOabort(&ObjDict_Data, ObjDict_Data.transfers[id].whoami, ObjDict_Data.transfers[id].CliServNbr, ObjDict_Data.transfers[id].index, ObjDict_Data.transfers[id].subIndex, SDOABT_TIMED_OUT);
+    ObjDict_Data.transfers[id].abortCode = SDOABT_TIMED_OUT;
     /* Call the user function to inform of the problem.*/
-    if (d->transfers[id].Callback)
+    if (ObjDict_Data.transfers[id].Callback)
         /*If ther is a callback, it is responsible to close SDO transfer (client)*/
-        (*d->transfers[id].Callback)(d, nodeId);
+        (*(ObjDict_Data.transfers[id].Callback))(&ObjDict_Data, nodeId);
     /*Reset the line if (whoami == SDO_SERVER) or the callback did not close the line.
      Otherwise this sdo transfer would never be closed. */
-    if (d->transfers[id].abortCode == SDOABT_TIMED_OUT)
-        resetSDOline(d, (UNS8) id);
+    if (ObjDict_Data.transfers[id].abortCode == SDOABT_TIMED_OUT)
+        resetSDOline(&ObjDict_Data, (UNS8) id);
 }
 
 #define StopSDO_TIMER(id) \
 	MSG_WAR(0x3A05, "StopSDO_TIMER for line : ", line);\
-d->transfers[id].timer = DelAlarm(d->transfers[id].timer);
+	ObjDict_Data.transfers[id].timer = DelAlarm(d->transfers[id].timer);
 
 #define StartSDO_TIMER(id) \
 	MSG_WAR(0x3A06, "StartSDO_TIMER for line : ", line);\
-d->transfers[id].timer = SetAlarm(d,id,&SDOTimeoutAlarm,MS_TO_TIMEVAL(SDO_TIMEOUT_MS),0);
+	ObjDict_Data.transfers[id].timer = SetAlarm(id,&SDOTimeoutAlarm,MS_TO_TIMEVAL(SDO_TIMEOUT_MS),0);
 
 #define RestartSDO_TIMER(id) \
 	MSG_WAR(0x3A07, "restartSDO_TIMER for line : ", line);\
@@ -218,7 +221,7 @@ UNS32 SDOlineToObjdict(CO_Data* d, UNS8 line) {
     }
 #else //SDO_DYNAMIC_BUFFER_ALLOCATION
     errorCode =
-            setODentry(d, d->transfers[line].index, d->transfers[line].subIndex, (void * ) d->transfers[line].data, &size, 1);
+            setODentry(d->transfers[line].index, d->transfers[line].subIndex, (void * ) d->transfers[line].data, &size, 1);
 #endif //SDO_DYNAMIC_BUFFER_ALLOCATION
 
     if (errorCode != OD_SUCCESSFUL)
@@ -269,7 +272,7 @@ UNS32 objdictToSDOline(CO_Data* d, UNS8 line) {
     }
 #else //SDO_DYNAMIC_BUFFER_ALLOCATION
     errorCode =
-            getODentry(d, d->transfers[line].index, d->transfers[line].subIndex, (void * )d->transfers[line].data, &size, &dataType, 1);
+            getODentry(d->transfers[line].index, d->transfers[line].subIndex, (void * )d->transfers[line].data, &size, &dataType, 1);
 #endif //SDO_DYNAMIC_BUFFER_ALLOCATION
 
     if (errorCode != OD_SUCCESSFUL)
@@ -725,14 +728,14 @@ UNS8 proceedSDO(CO_Data* d, Message *m) {
     UNS8 cs;
     UNS8 line;
     UNS32 nbBytes; /* received or to be transmited. */
-    UNS8 nodeId = 0; /* The node Id of the server if client otherwise unused */
+//    UNS8 nodeId = 0; /* The node Id of the server if client otherwise unused */
     UNS8 CliServNbr;
     UNS8 whoami = SDO_UNKNOWN; /* SDO_SERVER or SDO_CLIENT.*/
     UNS32 errorCode; /* while reading or writing in the local object dictionary.*/
     UNS8 data[8]; /* data for SDO to transmit */
     UNS16 index;
     UNS8 subIndex;
-    UNS32 abortCode;
+//    UNS32 abortCode;
     UNS32 i;
     UNS8 j;
     UNS16 *pCobId = NULL;
@@ -749,7 +752,7 @@ UNS8 proceedSDO(CO_Data* d, Message *m) {
     /* Looking for the cobId in the object dictionary. */
     /* Am-I a server ? */
     j = 0;
-    while (si = ObjDict_scanIndexOD(0x1200 + j, &si_size, &callbacks)) {
+    while ((si = ObjDict_scanIndexOD(0x1200 + j, &si_size, &callbacks))) {
         if (si_size <= 1) {
             MSG_ERR(0x1A61, "Subindex 1  not found at index ", 0x1200 + j);
             return 0xFF;
@@ -768,7 +771,7 @@ UNS8 proceedSDO(CO_Data* d, Message *m) {
     if (whoami == SDO_UNKNOWN) {
         /* Am-I client ? */
         j = 0;
-        while (si = ObjDict_scanIndexOD(0x1280 + j, &si_size, &callbacks)) {
+        while ((si = ObjDict_scanIndexOD(0x1280 + j, &si_size, &callbacks))) {
             if (si_size <= 3) {
                 MSG_ERR(0x1A63, "Subindex 3  not found at index ", 0x1280 + j);
                 return 0xFF;
@@ -781,7 +784,7 @@ UNS8 proceedSDO(CO_Data* d, Message *m) {
                 /* Defining Client number = index minus 0x1280 where the cobid received is defined. */
                 CliServNbr = j;
                 /* Reading the server node ID, if client it is mandatory in the OD */
-                nodeId = *((UNS8*) si[3].pObject);
+//                nodeId = *((UNS8*) si[3].pObject);
                 break;
             }
             j++;
@@ -1298,8 +1301,8 @@ UNS8 proceedSDO(CO_Data* d, Message *m) {
             break;
 
         case 4:
-            abortCode = (UNS32) m->data[4] | ((UNS32) m->data[5] << 8) | ((UNS32) m->data[6] << 16)
-                    | ((UNS32) m->data[7] << 24);
+//            abortCode = (UNS32) m->data[4] | ((UNS32) m->data[5] << 8) | ((UNS32) m->data[6] << 16)
+//                    | ((UNS32) m->data[7] << 24);
             /* Received SDO abort. */
             if (whoami == SDO_SERVER) {
                 if (!err) {
@@ -1778,7 +1781,7 @@ UNS8 GetSDOClientFromNodeId(CO_Data* d, UNS8 nodeId) {
     ODCallback_t *callbacks;
 
     CliNbr = 0;
-    while (si = ObjDict_scanIndexOD(0x1280 + CliNbr, &si_size, &callbacks)) {
+    while ((si = ObjDict_scanIndexOD(0x1280 + CliNbr, &si_size, &callbacks))) {
         if (si_size <= 3) {
             MSG_ERR(0x1AC8, "Subindex 3  not found at index ", 0x1280 + CliNbr);
             return 0xFF;
@@ -1979,7 +1982,7 @@ UNS8 subIndex, UNS32 count, UNS8 dataType, void *data, SDOCallback_t Callback, U
 
     ret = _writeNetworkDict(d, nodeId, index, subIndex, count, dataType, data, Callback, endianize, useBlockMode);
     if (ret == 0xFE) {
-        while (si = ObjDict_scanIndexOD(0x1280 + i, &si_size, &callbacks)) {
+        while ((si = ObjDict_scanIndexOD(0x1280 + i, &si_size, &callbacks))) {
             if (si_size <= 3) {
                 MSG_ERR(0x1AC8, "Subindex 3  not found at index ", 0x1280 + i);
                 return 0xFF;
@@ -2121,7 +2124,7 @@ UNS8 readNetworkDictCallbackAI(CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subInd
     ret = _readNetworkDict(d, nodeId, index, subIndex, dataType, Callback, useBlockMode);
     if (ret == 0xFE) {
         i = 0;
-        while (si = ObjDict_scanIndexOD(0x1280 + i, &si_size, &callbacks)) {
+        while ((si = ObjDict_scanIndexOD(0x1280 + i, &si_size, &callbacks))) {
             if (si_size <= 3) {
                 MSG_ERR(0x1AC8, "Subindex 3  not found at index ", 0x1280 + i);
                 return 0xFF;

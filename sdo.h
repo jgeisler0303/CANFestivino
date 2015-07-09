@@ -36,7 +36,7 @@
 
 struct struct_s_transfer;
 
-#include "timer.h"
+#include "CO_timer.h"
 
 /* Block mode : Data consumer receive step 
  * - set to RXSTEP_STARTED when client receive initiate upload response 
@@ -108,7 +108,7 @@ typedef struct __attribute__ ((packed)) struct_s_transfer s_transfer;
  * @param *d Pointer on a CAN object data structure
  * @param id
  */
-void SDOTimeoutAlarm(CO_Data* d, UNS32 id);
+void SDOTimeoutAlarm(UNS8 id);
 
 /** 
  * @brief Reset all SDO buffers.

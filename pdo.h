@@ -32,7 +32,7 @@
 #include "applicfg.h"
 #include "def.h"
 
-#include "can.h"
+#include "CO_can.h"
 
 typedef struct struct_s_PDO_status s_PDO_status;
 
@@ -136,7 +136,7 @@ void PDOStop(CO_Data* d);
  * @param *d Pointer on a CAN object data structure
  * @param pdoNum The PDO number
  */
-void PDOEventTimerAlarm(CO_Data* d, UNS32 pdoNum);
+void PDOEventTimerAlarm(UNS8 pdoNum);
 
 /** 
  * @ingroup pdo
@@ -144,7 +144,7 @@ void PDOEventTimerAlarm(CO_Data* d, UNS32 pdoNum);
  * @param *d Pointer on a CAN object data structure
  * @param pdoNum The PDO number
  */
-void PDOInhibitTimerAlarm(CO_Data* d, UNS32 pdoNum);
+void PDOInhibitTimerAlarm(UNS8 pdoNum);
 
 /* copy bit per bit in little endian */
 void CopyBits(UNS8 NbBits, UNS8* SrcByteIndex, UNS8 SrcBitIndex, UNS8 SrcBigEndian, UNS8* DestByteIndex, UNS8 DestBitIndex, UNS8 DestBigEndian);

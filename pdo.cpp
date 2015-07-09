@@ -23,7 +23,6 @@
  */
 #include "pdo.h"
 #include "objacces.h"
-#include "canfestival.h"
 #include "sysdep.h"
 
 /*!
@@ -82,8 +81,7 @@ UNS8 buildPDO(CO_Data * d, UNS8 numPdo, Message * pdo) {
             MSG_WAR(0x3050, "    at index : ", 0x1A00+numPdo);
             MSG_WAR(0x3051, "    sub-index : ", prp_j + 1);
 
-            if (getODentry (d, index, subIndex, tmp, &ByteSize, &dataType, 0) !=
-            OD_SUCCESSFUL) {
+            if (getODentry (index, subIndex, tmp, &ByteSize, &dataType, 0) != OD_SUCCESSFUL) {
                 MSG_ERR(0x1013, " Couldn't find mapped variable at index-subindex-size : ", (UNS32) (*pMappingParameter));
                 return 0xFF;
             }
@@ -219,7 +217,7 @@ UNS8 proceedPDO(CO_Data * d, Message * m) {
                     ByteSize = (UNS32) (1 + ((ode_size - 1) >> 3));
 
                     objDict =
-                            setODentry(d, (UNS16) (pMappingParameter >> 16), (UNS8) ((pMappingParameter >> 8) & 0xFF), tmp, &ByteSize, 0);
+                            setODentry((UNS16) (pMappingParameter >> 16), (UNS8) ((pMappingParameter >> 8) & 0xFF), tmp, &ByteSize, 0);
 
                     if (objDict != OD_SUCCESSFUL) {
                         MSG_ERR(0x1938, "error accessing to the mapped var : ", numMap + 1);
@@ -238,7 +236,7 @@ UNS8 proceedPDO(CO_Data * d, Message * m) {
 // 	  TIMEVAL EventTimerDuration = *(UNS16 *)ObjDict_objdict[offsetObjdict].pSubindex[5].pObject;
 // 	  if(EventTimerDuration){
 // 	      DelAlarm (d->RxPDO_EventTimers[numPdo]);
-// 	      d->RxPDO_EventTimers[numPdo] = SetAlarm (d, numPdo, d->RxPDO_EventTimers_Handler, MS_TO_TIMEVAL (EventTimerDuration), 0);
+// 	      d->RxPDO_EventTimers[numPdo] = SetAlarm (numPdo, d->RxPDO_EventTimers_Handler, MS_TO_TIMEVAL (EventTimerDuration), 0);
 // 	  }
 //       }
             return 0;
@@ -278,7 +276,7 @@ UNS8 proceedPDO(CO_Data * d, Message * m) {
                 ObjDict_PDO_status[numPdo].transmit_type_parameter &= ~PDO_INHIBITED;
                 /* Call  PDOEventTimerAlarm for this TPDO,
                  * this will trigger emission et reset timers */
-                PDOEventTimerAlarm(d, numPdo);
+                PDOEventTimerAlarm(numPdo);
                 return 0;
             } else {
                 /* The requested PDO is not to send on request. So, does
@@ -383,7 +381,6 @@ UNS8 sendPDOevent(CO_Data * d) {
 }
 
 UNS8 sendOnePDOevent(CO_Data * d, UNS8 pdoNum) {
-    UNS16 offsetObjdict;
     const subindex *param_si;
     UNS8 si_size;
     ODCallback_t *callbacks;
@@ -422,13 +419,13 @@ UNS8 sendOnePDOevent(CO_Data * d, UNS8 pdoNum) {
             if (EventTimerDuration) {
                 DelAlarm(ObjDict_PDO_status[pdoNum].event_timer);
                 ObjDict_PDO_status[pdoNum].event_timer =
-                        SetAlarm(d, pdoNum, &PDOEventTimerAlarm, MS_TO_TIMEVAL(EventTimerDuration), 0);
+                        SetAlarm(pdoNum, &PDOEventTimerAlarm, MS_TO_TIMEVAL(EventTimerDuration), 0);
             }
 
             if (InhibitTimerDuration) {
                 DelAlarm(ObjDict_PDO_status[pdoNum].inhibit_timer);
                 ObjDict_PDO_status[pdoNum].inhibit_timer =
-                        SetAlarm(d, pdoNum, &PDOInhibitTimerAlarm, US_TO_TIMEVAL(InhibitTimerDuration * 100), 0);
+                        SetAlarm(pdoNum, &PDOInhibitTimerAlarm, MS_TO_TIMEVAL(InhibitTimerDuration / 10), 0);
                 /* and inhibit TPDO */
                 ObjDict_PDO_status[pdoNum].transmit_type_parameter |=
                 PDO_INHIBITED;
@@ -440,20 +437,20 @@ UNS8 sendOnePDOevent(CO_Data * d, UNS8 pdoNum) {
     return 1;
 }
 
-void PDOEventTimerAlarm(CO_Data * d, UNS32 pdoNum) {
+void PDOEventTimerAlarm(UNS8 pdoNum) {
     /* This is needed to avoid deletion of re-attribuated timer */
     ObjDict_PDO_status[pdoNum].event_timer = TIMER_NONE;
     /* force emission of PDO by artificially changing last emitted */
     ObjDict_PDO_status[pdoNum].event_trigger = 1;
-    sendOnePDOevent(d, (UNS8) pdoNum);
+    sendOnePDOevent(&ObjDict_Data, (UNS8) pdoNum);
 }
 
-void PDOInhibitTimerAlarm(CO_Data * d, UNS32 pdoNum) {
+void PDOInhibitTimerAlarm(UNS8 pdoNum) {
     /* This is needed to avoid deletion of re-attribuated timer */
     ObjDict_PDO_status[pdoNum].inhibit_timer = TIMER_NONE;
     /* Remove inhibit flag */
     ObjDict_PDO_status[pdoNum].transmit_type_parameter &= ~PDO_INHIBITED;
-    sendOnePDOevent(d, (UNS8) pdoNum);
+    sendOnePDOevent(&ObjDict_Data, (UNS8) pdoNum);
 }
 
 // void _RxPDO_EventTimers_Handler(CO_Data *d, UNS32 pdoNum) {}
@@ -470,7 +467,7 @@ void PDOInhibitTimerAlarm(CO_Data * d, UNS32 pdoNum) {
 UNS8 _sendPDOevent(CO_Data * d, UNS8 isSyncEvent) {
     ; /* number of the actual processed pdo-nr. */
     UNS8 pTransmissionType;
-    const subindex *param_si, *map_si;
+    const subindex *param_si;
     UNS8 si_size;
     ODCallback_t *callbacks;
 
@@ -558,7 +555,7 @@ UNS16 bIndex, UNS8 bSubindex, UNS8 writeAccess) {
                 ObjDict_PDO_status[numPdo].inhibit_timer = DelAlarm(ObjDict_PDO_status[numPdo].inhibit_timer);
                 ObjDict_PDO_status[numPdo].transmit_type_parameter = 0;
                 /* Call  PDOEventTimerAlarm for this TPDO, this will trigger emission et reset timers */
-                PDOEventTimerAlarm(&ObjDict_Data, numPdo);
+                PDOEventTimerAlarm(numPdo);
                 return 0;
             }
 

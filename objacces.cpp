@@ -31,10 +31,9 @@
  **
  */
 
-/* #define DEBUG_WAR_CONSOLE_ON */
-/* #define DEBUG_ERR_CONSOLE_ON */
-
 #include "data.h"
+
+// TODO: add eeprom persistance
 
 UNS8 objectSize(const subindex *s) {
     switch (s->bDataType) {
@@ -82,7 +81,7 @@ UNS8 objectSize(const subindex *s) {
             return 10; // TODO: figure aut way to return true size
     }
 
-    return 0;
+    return ObjDict_DataSize(s);
 }
 
 //We need the function implementation for linking
@@ -132,7 +131,7 @@ UNS32 sizeDataDict, UNS32 sizeDataGiven, UNS32 code) {
     return 0;
 }
 
-UNS32 getODentryImpl(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pDestData, UNS32 * pExpectedSize, UNS8 * pDataType, UNS8 checkAccess, UNS8 endianize) {
+UNS32 getODentry(UNS16 wIndex, UNS8 bSubindex, void * pDestData, UNS32 * pExpectedSize, UNS8 * pDataType, UNS8 checkAccess) {
     /* DO NOT USE MSG_ERR because the macro may send a PDO -> infinite loop if it fails. */
     UNS8 size;
     UNS32 errorCode;
@@ -176,24 +175,6 @@ UNS32 getODentryImpl(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pDestData,
     *pDataType = si[bSubindex].bDataType;
     szData = objectSize(&si[bSubindex]);
 
-#  ifdef CANOPEN_BIG_ENDIAN
-    if(endianize && *pDataType > CANopen_TYPE_boolean && !(
-                    *pDataType >= visible_string &&
-                    *pDataType <= domain)) {
-        /* data must be transmited with low byte first */
-        UNS8 i, j = 0;
-        MSG_WAR(CANopen_TYPE_boolean, "data type ", *pDataType);
-        MSG_WAR(visible_string, "data type ", *pDataType);
-        for ( i = szData; i > 0; i--) {
-            MSG_WAR(i," ", j);
-            ((UNS8*)pDestData)[j++] =
-            ((UNS8*)si[bSubindex].pObject)[i-1];
-        }
-        *pExpectedSize = szData;
-    }
-    else /* no endianisation change */
-#  endif
-
     if (*pDataType != CANopen_TYPE_visible_string) {
         memcpy(pDestData, si[bSubindex].pObject, szData);
         *pExpectedSize = szData;
@@ -221,7 +202,7 @@ UNS32 getODentryImpl(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pDestData,
     return OD_SUCCESSFUL;
 }
 
-UNS32 _setODentry(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData, UNS32 * pExpectedSize, UNS8 checkAccess, UNS8 endianize) {
+UNS32 setODentry(UNS16 wIndex, UNS8 bSubindex, void * pSourceData, UNS32 * pExpectedSize, UNS8 checkAccess) {
     UNS32 szData;
     UNS8 dataType;
     UNS32 errorCode;
@@ -250,24 +231,6 @@ UNS32 _setODentry(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData, 
     if (*pExpectedSize == 0 || *pExpectedSize == szData
             || /* allow to store a shorter string than entry size */(dataType == CANopen_TYPE_visible_string
                     && *pExpectedSize < szData)) {
-#ifdef CANOPEN_BIG_ENDIAN
-        /* re-endianize do not occur for bool, strings time and domains */
-        if(endianize && dataType > CANopen_TYPE_boolean && !(
-                        dataType >= visible_string &&
-                        dataType <= domain))
-        {
-            /* we invert the data source directly. This let us do range
-             testing without */
-            /* additional temp variable */
-            UNS8 i;
-            for ( i = 0; i < ( objectSize(&si[bSubindex])); i++)
-            {
-                UNS8 tmp =((UNS8 *)pSourceData) [(objectSize(&si[bSubindex]) - 1) - i];
-                ((UNS8 *)pSourceData) [(objectSize(&si[bSubindex]) - 1) - i] = ((UNS8 *)pSourceData)[i];
-                ((UNS8 *)pSourceData)[i] = tmp;
-            }
-        }
-#endif
         errorCode = ObjDict_valueRangeTest(dataType, pSourceData);
         if (errorCode) {
             accessDictionaryError(wIndex, bSubindex, szData, *pExpectedSize, errorCode);
@@ -305,7 +268,7 @@ UNS32 _setODentry(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, void * pSourceData, 
     }
 }
 
-UNS32 RegisterSetODentryCallBack(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, ODCallback_t Callback) {
+UNS32 RegisterSetODentryCallBack(UNS16 wIndex, UNS8 bSubindex, ODCallback_t Callback) {
     UNS8 size;
     ODCallback_t *CallbackList;
     const subindex *si;
@@ -318,4 +281,3 @@ UNS32 RegisterSetODentryCallBack(CO_Data* d, UNS16 wIndex, UNS8 bSubindex, ODCal
         return OD_NO_SUCH_OBJECT;
 }
 
-// void _storeODSubIndex (CO_Data* d, UNS16 wIndex, UNS8 bSubindex){}

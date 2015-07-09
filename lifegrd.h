@@ -53,6 +53,7 @@
 #define __lifegrd_h__
 
 #include "applicfg.h"
+#include "states.h"
 
 typedef void (*heartbeatError_t)(CO_Data*, UNS8);
 void _heartbeatError(CO_Data* d, UNS8 heartbeatID);

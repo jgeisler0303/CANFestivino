@@ -29,8 +29,10 @@
 typedef struct struct_CO_Data CO_Data;
 
 #include "applicfg.h"
+#include "states.h"
 #include "def.h"
-#include "can.h"
+#include "CO_can.h"
+#include "CO_timer.h"
 #include "objdictdef.h"
 #include "objacces.h"
 #include "sdo.h"
@@ -51,6 +53,8 @@ extern s_PDO_status ObjDict_PDO_status[];
 extern const UNS16 ObjDict_ObjdictSize;
 extern const UNS8 ObjDict_iam_a_slave;
 UNS32 ObjDict_valueRangeTest(UNS8 typeValue, void * value);
+UNS8 ObjDict_DataSize(const subindex *s);
+
 #define ConsumerHeartbeatCount ObjDict_highestSubIndex_obj1016
 extern UNS8 ObjDict_highestSubIndex_obj1016;
 #define ConsumerHeartbeatEntries ObjDict_obj1016

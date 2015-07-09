@@ -35,7 +35,6 @@
 
 #include "data.h"
 #include "emcy.h"
-#include "canfestival.h"
 #include "sysdep.h"
 
 #define Data data  /* temporary fix */
@@ -70,7 +69,7 @@ UNS32 OnNumberOfErrorsUpdate(const subindex * OD_entry, UNS16 bIndex, UNS8 bSubi
  ** @param d
  **/
 void emergencyInit(CO_Data* d) {
-    RegisterSetODentryCallBack(d, 0x1003, 0x00, &OnNumberOfErrorsUpdate);
+    RegisterSetODentryCallBack(0x1003, 0x00, &OnNumberOfErrorsUpdate);
 
     error_number = 0;
 }
@@ -164,12 +163,15 @@ UNS8 EMCY_setError(CO_Data* d, UNS16 errCode, UNS8 errRegMask, UNS16 addInfo) {
     for (index = 0, errRegister_tmp = 0; index < EMCY_MAX_ERRORS; ++index)
         if (d->error_data[index].active == 1)
             errRegister_tmp |= d->error_data[index].errRegMask;
+	
     error_register = errRegister_tmp;
 
     /* set Pre-defined Error Field (1003h) */
     for (index = d->error_history_size - 1; index > 0; --index)
         *(error_first_element + index) = *(error_first_element + index - 1);
+    
     *(error_first_element) = errCode | ((UNS32) addInfo << 16);
+    
     if (error_number < d->error_history_size)
         ++(error_number);
 
@@ -225,9 +227,9 @@ void EMCY_errorRecovered(CO_Data* d, UNS16 errCode) {
  **
  **/
 void proceedEMCY(CO_Data* d, Message* m) {
-    UNS8 nodeID;
-    UNS16 errCode;
-    UNS8 errReg;
+//    UNS8 nodeID;
+//    UNS16 errCode;
+//    UNS8 errReg;
 
     MSG_WAR(0x3055, "EMCY received. Proceed. ", 0);
 
@@ -238,9 +240,9 @@ void proceedEMCY(CO_Data* d, Message* m) {
     }
 
     /* post the received EMCY */
-    nodeID = m->cob_id & 0x7F;
-    errCode = m->Data[0] | ((UNS16) m->Data[1] << 8);
-    errReg = m->Data[2];
+//    nodeID = m->cob_id & 0x7F;
+//    errCode = m->Data[0] | ((UNS16) m->Data[1] << 8);
+//    errReg = m->Data[2];
     // (*d->post_emcy)(d, nodeID, errCode, errReg);
 }
 

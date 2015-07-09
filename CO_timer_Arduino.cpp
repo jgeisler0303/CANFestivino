@@ -21,23 +21,25 @@
  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef __TIMERSCFG_H__
-#define __TIMERSCFG_H__
+// AVR implementation of the  CANopen timer driver, uses Timer 3 (16 bit)
+// Includes for the Canfestival driver
+#include "CO_timer.h"
+#include "config.h"
 
-// Whatever your microcontroller, the timer wont work if
-// TIMEVAL is not at least on 32 bits
-#define TIMEVAL UNS32
 
-// The timer of the AVR counts from 0000 to 0xFFFF in normal mode
-#define TIMEVAL_MAX 0xFFFF
+// TODO: set number of timers via COInit
+Timer<MAX_NB_TIMER> t;
 
-// The timer is incrementing every 4 us.
-#define MS_TO_TIMEVAL(ms) ((ms) * 250)
-#define US_TO_TIMEVAL(us) ((us)>>2)
+TIMER_HANDLE SetAlarm(UNS8 id, timerCallback_t callback, TIMEVAL value, TIMEVAL period) {
+    if(period) return t.every(period, callback, id);
+    else return t.after(value, callback, id);
+}
 
-// The timer is incrementing every 8 us.
-//#define MS_TO_TIMEVAL(ms) ((ms) * 125)
-//#define US_TO_TIMEVAL(us) ((us)>>3)
-extern volatile uint8_t coreTimerTrigger;
+TIMER_HANDLE DelAlarm(TIMER_HANDLE handle) {
+    t.stop(handle);
+    return TIMER_NONE;
+}
 
-#endif
+void TimeDispatch(void) {
+    t.update();
+}

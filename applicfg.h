@@ -41,18 +41,10 @@
 #define UNS8   unsigned char
 #define UNS16  unsigned short
 #define UNS32  unsigned long
-/*
- #define UNS24
- #define UNS40
- #define UNS48
- #define UNS56
- #define UNS64
- */
 
 // Reals
 #define REAL32	float
 #define REAL64 double
-#include "can.h"
 
 // MSG functions
 // not finished, the strings have to be placed to the flash and printed out 
@@ -76,10 +68,6 @@
 #else
 #    define MSG_WAR(num, str, val)
 #endif
-
-typedef void* CAN_HANDLE;
-
-typedef void* CAN_PORT;
 
 #endif
 

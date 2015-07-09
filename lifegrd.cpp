@@ -34,7 +34,6 @@
 
 #include "data.h"
 #include "lifegrd.h"
-#include "canfestival.h"
 #include "sysdep.h"
 
 // e_nodeState getNodeState (CO_Data* d, UNS8 nodeId)
@@ -147,7 +146,7 @@ void proceedNODE_GUARD(CO_Data* d, Message* m) {
                     TIMEVAL time = ( (ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF );
                     /* Renew alarm for next heartbeat. */
                     DelAlarm(d->ConsumerHeartBeatTimers[index]);
-                    d->ConsumerHeartBeatTimers[index] = SetAlarm(d, index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
+                    d->ConsumerHeartBeatTimers[index] = SetAlarm(index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
                 }
             }
         }
@@ -162,7 +161,7 @@ void proceedNODE_GUARD(CO_Data* d, Message* m) {
  ** @param id
  * @ingroup heartbeato
  **/
-void ProducerHeartbeatAlarm(CO_Data* d, UNS32 id) {
+void ProducerHeartbeatAlarm(UNS8 id) {
     if (ProducerHeartBeatTime) {
         Message msg;
         /* Time expired, the heartbeat must be sent immediately
@@ -175,13 +174,13 @@ void ProducerHeartbeatAlarm(CO_Data* d, UNS32 id) {
         msg.cob_id = UNS16_LE(tmp);
         msg.len = (UNS8) 0x01;
         msg.rtr = 0;
-        msg.data[0] = d->nodeState; /* No toggle for heartbeat !*/
+        msg.data[0] = ObjDict_Data.nodeState; /* No toggle for heartbeat !*/
         /* send the heartbeat */
         MSG_WAR(0x3130, "Producing heartbeat: ", d->nodeState);
         canSend(&msg);
 
     } else {
-        d->ProducerHeartBeatTimer = DelAlarm(d->ProducerHeartBeatTimer);
+        ObjDict_Data.ProducerHeartBeatTimer = DelAlarm(ObjDict_Data.ProducerHeartBeatTimer);
     }
 }
 
@@ -253,8 +252,8 @@ UNS32 OnNodeGuardUpdate(const subindex * OD_entry, UNS16 bIndex, UNS8 bSubindex,
 #ifdef CO_ENABLE_NODE_GUARD
     nodeguardStop();
     nodeguardInit();
-    return 0;
 #endif
+    return 0;
 }
 
 /*! This is called when Index 0x1017 is updated.
@@ -278,8 +277,8 @@ UNS32 OnHeartbeatProducerUpdate(const subindex * OD_entry, UNS16 bIndex, UNS8 bS
 
 void heartbeatInit() {
 
-    UNS8 index; /* Index to scan the table of heartbeat consumers */
-    RegisterSetODentryCallBack(&ObjDict_Data, 0x1017, 0x00, &OnHeartbeatProducerUpdate);
+//    UNS8 index; /* Index to scan the table of heartbeat consumers */
+    RegisterSetODentryCallBack(0x1017, 0x00, &OnHeartbeatProducerUpdate);
 
     ObjDict_Data.toggle = 0;
 
@@ -289,14 +288,14 @@ void heartbeatInit() {
         TIMEVAL time = (UNS16) ( (ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF );
         if ( time )
         {
-            ObjDict_Data->ConsumerHeartBeatTimers[index] = SetAlarm(ObjDict_Data, index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
+            ObjDict_Data->ConsumerHeartBeatTimers[index] = SetAlarm(index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
         }
     }
 #endif
     if ( ProducerHeartBeatTime) {
         TIMEVAL time = ProducerHeartBeatTime;
         ObjDict_Data.ProducerHeartBeatTimer =
-                SetAlarm(&ObjDict_Data, 0, &ProducerHeartbeatAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
+                SetAlarm(0, &ProducerHeartbeatAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
     }
 }
 
@@ -310,7 +309,7 @@ void nodeguardInit(CO_Data* d) {
         UNS8 i;
 
         TIMEVAL time = *d->GuardTime;
-        d->GuardTimeTimer = SetAlarm(d, 0, &GuardTimeAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
+        d->GuardTimeTimer = SetAlarm(0, &GuardTimeAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
         MSG_WAR(0x0, "GuardTime: ", time);
 
         for (i = 0; i < NMT_MAX_NODE_ID; i++) {

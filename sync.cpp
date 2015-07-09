@@ -37,7 +37,6 @@
 
 #include "data.h"
 #include "sync.h"
-#include "canfestival.h"
 #include "sysdep.h"
 
 /* Prototypes for internals functions */
@@ -94,11 +93,10 @@ void startSYNC()
     if(COB_ID_Sync & 0x40000000ul && Sync_Cycle_Period)
     {
         ObjDict_Data->syncTimer = SetAlarm(
-                ObjDict_Data,
                 0 /*No id needed*/,
                 &SyncAlarm,
-                US_TO_TIMEVAL(*ObjDict_Data->Sync_Cycle_Period),
-                US_TO_TIMEVAL(*ObjDict_Data->Sync_Cycle_Period));
+                MS_TO_TIMEVAL(*ObjDict_Data->Sync_Cycle_Period/1000),
+                MS_TO_TIMEVAL(*ObjDict_Data->Sync_Cycle_Period/1000));
     }
 }
 
