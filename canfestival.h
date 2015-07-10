@@ -57,7 +57,7 @@ template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::CO_Ini
 
     initCAN();
 
-    setState(&ObjDict_Data, Initialisation);
+    setState(Initialisation);
 
     SetAlarm(0, &errorStateBlink, 62, 62);
 
@@ -75,7 +75,7 @@ template<int redLEDPin, int greenLEDPin> void CO<redLEDPin, greenLEDPin>::CO_Cyc
 
         if (isRxNoError())
             flashGreen();
-        canDispatch(&ObjDict_Data, &m);         // process it
+        canDispatch(&m);         // process it
     }
 
     uint8_t ef = CAN.errorFlag();

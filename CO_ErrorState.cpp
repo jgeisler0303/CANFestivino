@@ -81,38 +81,38 @@ const uint16_t CANopenMonErr_RxOverFlow= 0x8202;
 void updateTxErrorState() {
     if (tx_last_error != tx_error_state) {
         if (tx_error_state == tx_no_error) {
-            EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxBusOff);
-            EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxErr);
-            EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxPassive);
-            EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxAllBusy);
-            EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxWarn);
+            EMCY_errorRecovered(CANopenMonErr_TxBusOff);
+            EMCY_errorRecovered(CANopenMonErr_TxErr);
+            EMCY_errorRecovered(CANopenMonErr_TxPassive);
+            EMCY_errorRecovered(CANopenMonErr_TxAllBusy);
+            EMCY_errorRecovered(CANopenMonErr_TxWarn);
         } else {
             switch (tx_error_state) {
                 case tx_warning:
-                    EMCY_setError(&ObjDict_Data, CANopenMonErr_TxWarn, CANopenErrReg_Communication, 0);
+                    EMCY_setError(CANopenMonErr_TxWarn, CANopenErrReg_Communication, 0);
                     break;
                 case tx_all_busy: // TODO: will probably not get sent !!
-                    EMCY_setError(&ObjDict_Data, CANopenMonErr_TxAllBusy, CANopenErrReg_Communication, 0);
+                    EMCY_setError(CANopenMonErr_TxAllBusy, CANopenErrReg_Communication, 0);
                     break;
                 case tx_passive:
-                    EMCY_setError(&ObjDict_Data, CANopenMonErr_TxPassive, CANopenErrReg_Communication, 0);
+                    EMCY_setError(CANopenMonErr_TxPassive, CANopenErrReg_Communication, 0);
                     break;
                 case tx_error: // TODO: will probably not get sent !!
-                    EMCY_setError(&ObjDict_Data, CANopenMonErr_TxErr, CANopenErrReg_Communication, 0);
+                    EMCY_setError(CANopenMonErr_TxErr, CANopenErrReg_Communication, 0);
                     break;
                 case tx_bus_off: // TODO: will probably not get sent !!
-                    EMCY_setError(&ObjDict_Data, CANopenMonErr_TxBusOff, CANopenErrReg_Communication, 0);
+                    EMCY_setError(CANopenMonErr_TxBusOff, CANopenErrReg_Communication, 0);
                     break;
             }
             switch (tx_error_state) {
                 case tx_bus_off:
-                    EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxErr);
+                    EMCY_errorRecovered(CANopenMonErr_TxErr);
                 case tx_error:
-                    EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxPassive);
+                    EMCY_errorRecovered(CANopenMonErr_TxPassive);
                 case tx_passive:
-                    EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxAllBusy);
+                    EMCY_errorRecovered(CANopenMonErr_TxAllBusy);
                 case tx_all_busy:
-                    EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_TxWarn);
+                    EMCY_errorRecovered(CANopenMonErr_TxWarn);
             }
         }
         tx_last_error = tx_error_state;
@@ -122,26 +122,26 @@ void updateTxErrorState() {
 void updateRxErrorState() {
     if (rx_last_error != rx_error_state) {
         if (rx_error_state == rx_no_error) {
-            EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_RxOverFlow);
-            EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_RxPassive);
-            EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_RxWarn);
+            EMCY_errorRecovered(CANopenMonErr_RxOverFlow);
+            EMCY_errorRecovered(CANopenMonErr_RxPassive);
+            EMCY_errorRecovered(CANopenMonErr_RxWarn);
         } else {
             switch (rx_error_state) {
                 case rx_warning:
-                    EMCY_setError(&ObjDict_Data, CANopenMonErr_RxWarn, CANopenErrReg_Communication, 0);
+                    EMCY_setError(CANopenMonErr_RxWarn, CANopenErrReg_Communication, 0);
                     break;
                 case rx_passive:
-                    EMCY_setError(&ObjDict_Data, CANopenMonErr_RxPassive, CANopenErrReg_Communication, 0);
+                    EMCY_setError(CANopenMonErr_RxPassive, CANopenErrReg_Communication, 0);
                     break;
                 case rx_overflow:
-                    EMCY_setError(&ObjDict_Data, CANopenMonErr_RxOverFlow, CANopenErrReg_Communication, 0);
+                    EMCY_setError(CANopenMonErr_RxOverFlow, CANopenErrReg_Communication, 0);
                     break;
             }
             switch (rx_error_state) {
                 case rx_overflow:
-                    EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_RxPassive);
+                    EMCY_errorRecovered(CANopenMonErr_RxPassive);
                 case rx_passive:
-                    EMCY_errorRecovered(&ObjDict_Data, CANopenMonErr_RxWarn);
+                    EMCY_errorRecovered(CANopenMonErr_RxWarn);
             }
         }
         rx_last_error = rx_error_state;

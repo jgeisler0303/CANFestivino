@@ -42,7 +42,7 @@
 #include "applicfg.h"
 
 typedef UNS32 (*valueRangeTest_t)(UNS8 typeValue, void *Value);
-typedef void (*storeODSubIndex_t)(CO_Data* d, UNS16 wIndex, UNS8 bSubindex);
+typedef void (*storeODSubIndex_t)(UNS16 wIndex, UNS8 bSubindex);
 
 UNS8 objectSize(subindex *s);
 

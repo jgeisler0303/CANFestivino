@@ -39,7 +39,7 @@ typedef struct struct_s_PDO_status s_PDO_status;
 #include "data.h"
 
 /* Handler for RxPDO event timers : empty function that user can overload */
-// void _RxPDO_EventTimers_Handler(CO_Data *d, UNS32 pdoNum);
+// void _RxPDO_EventTimers_Handler(UNS32 pdoNum);
 /* Status of the TPDO : */
 #define PDO_INHIBITED 0x01
 #define PDO_RTR_SYNC_READY 0x01
@@ -74,7 +74,7 @@ struct struct_s_PDO_status {
  * @param *pdo Pointer on a CAN message structure
  * @return 0 or 0xFF if error.
  */
-UNS8 buildPDO(CO_Data* d, UNS8 numPdo, Message *pdo);
+UNS8 buildPDO(UNS8 numPdo, Message *pdo);
 
 /** 
  * @ingroup pdo
@@ -87,7 +87,7 @@ UNS8 buildPDO(CO_Data* d, UNS8 numPdo, Message *pdo);
  
  * @return 0xFF if error, other in success.
  */
-UNS8 sendPDOrequest(CO_Data* d, UNS16 RPDOIndex);
+UNS8 sendPDOrequest(UNS16 RPDOIndex);
 
 /**
  * @brief Compute a PDO frame reception
@@ -96,7 +96,7 @@ UNS8 sendPDOrequest(CO_Data* d, UNS16 RPDOIndex);
  * @param *m Pointer on a CAN message structure
  * @return 0xFF if error, else return 0
  */
-UNS8 proceedPDO(CO_Data* d, Message *m);
+UNS8 proceedPDO(Message *m);
 
 /** 
  * @brief Used by the application to signal changes in process data
@@ -106,8 +106,8 @@ UNS8 proceedPDO(CO_Data* d, Message *m);
  * type and content change before sending it.    
  * @param *d Pointer on a CAN object data structure
  */
-UNS8 sendPDOevent(CO_Data* d);
-UNS8 sendOnePDOevent(CO_Data* d, UNS8 pdoNum);
+UNS8 sendPDOevent();
+UNS8 sendOnePDOevent(UNS8 pdoNum);
 
 /** 
  * @ingroup pdo
@@ -116,19 +116,19 @@ UNS8 sendOnePDOevent(CO_Data* d, UNS8 pdoNum);
  * @param *d Pointer on a CAN object data structure
  * @param isSyncEvent
  */
-UNS8 _sendPDOevent(CO_Data* d, UNS8 isSyncEvent);
+UNS8 _sendPDOevent(UNS8 isSyncEvent);
 
 /** 
  * @brief Initialize PDO feature 
  * @param *d Pointer on a CAN object data structure
  */
-void PDOInit(CO_Data* d);
+void PDOInit();
 
 /** 
  * @brief Stop PDO feature 
  * @param *d Pointer on a CAN object data structure
  */
-void PDOStop(CO_Data* d);
+void PDOStop();
 
 /** 
  * @ingroup pdo

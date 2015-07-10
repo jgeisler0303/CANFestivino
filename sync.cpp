@@ -47,8 +47,8 @@
  ** @param d                                                                                        
  ** @param id                                                                                       
  **/
-void SyncAlarm(CO_Data* d, UNS32 id);
-UNS32 OnCOB_ID_SyncUpdate(CO_Data* d, const indextable * unsused_indextable,
+void SyncAlarm(UNS32 id);
+UNS32 OnCOB_ID_SyncUpdate(const indextable * unsused_indextable,
         UNS8 unsused_bSubindex);
 
 /*!                                                                                                
@@ -57,7 +57,7 @@ UNS32 OnCOB_ID_SyncUpdate(CO_Data* d, const indextable * unsused_indextable,
  ** @param d                                                                                        
  ** @param id                                                                                       
  **/
-void SyncAlarm(CO_Data* d, UNS32 id)
+void SyncAlarm(UNS32 id)
 {
     sendSYNC(d);
 }
@@ -120,7 +120,7 @@ void stopSYNC()
  **                                                                                                 
  ** @return                                                                                         
  **/
-UNS8 sendSYNCMessage(CO_Data* d)
+UNS8 sendSYNCMessage()
 {
     Message m;
 
@@ -141,7 +141,7 @@ UNS8 sendSYNCMessage(CO_Data* d)
  **                                                                                                 
  ** @return                                                                                         
  **/
-UNS8 sendSYNC(CO_Data* d)
+UNS8 sendSYNC()
 {
     UNS8 res;
     res = sendSYNCMessage(d);
@@ -150,9 +150,9 @@ UNS8 sendSYNC(CO_Data* d)
 }
 
 #else
-void startSYNC(CO_Data* d) {
+void startSYNC() {
 }
-void stopSYNC(CO_Data* d) {
+void stopSYNC() {
 }
 #endif
 
@@ -164,28 +164,28 @@ void stopSYNC(CO_Data* d) {
  **                                                                                                 
  ** @return                                                                                         
  **/
-UNS8 proceedSYNC(CO_Data* d) {
+UNS8 proceedSYNC() {
 
     UNS8 res;
 
     MSG_WAR(0x3002, "SYNC received. Proceed. ", 0);
 
-    (*d->post_sync)(d);
+    (*ObjDict_Data.post_sync)();
 
     /* only operational state allows PDO transmission */
-    if (!d->CurrentCommunicationState.csPDO)
+    if (!ObjDict_Data.CurrentCommunicationState.csPDO)
         return 0;
 
-    res = _sendPDOevent(d, 1 /*isSyncEvent*/);
+    res = _sendPDOevent(1 /*isSyncEvent*/);
 
     /*Call user app callback*/
-    (*d->post_TPDO)(d);
+    (*ObjDict_Data.post_TPDO)();
 
     return res;
 
 }
 
-void _post_sync(CO_Data* d) {
+void _post_sync() {
 }
-void _post_TPDO(CO_Data* d) {
+void _post_TPDO() {
 }

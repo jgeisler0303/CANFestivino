@@ -45,7 +45,7 @@
  ** @return
  **/
 
-UNS8 buildPDO(CO_Data * d, UNS8 numPdo, Message * pdo) {
+UNS8 buildPDO(UNS8 numPdo, Message * pdo) {
     UNS8 size;
     ODCallback_t *Callback;
 
@@ -58,7 +58,7 @@ UNS8 buildPDO(CO_Data * d, UNS8 numPdo, Message * pdo) {
 
     pdo->cob_id = (UNS16) UNS16_LE(*(UNS16*)TPDO_com[1].pObject & 0x7FF);
     pdo->rtr = NOT_A_REQUEST;
-    d->currentPDO = numPdo;
+    ObjDict_Data.currentPDO = numPdo;
 
     MSG_WAR(0x3009, "  PDO CobId is : ", *(UNS32 *) TPDO_com[1].pObject);
     MSG_WAR(0x300D, "  Number of objects mapped : ", *pMappingCount);
@@ -108,13 +108,13 @@ UNS8 buildPDO(CO_Data * d, UNS8 numPdo, Message * pdo) {
  **
  ** @return
  **/
-UNS8 sendPDOrequest(CO_Data * d, UNS16 RPDOIndex) {
+UNS8 sendPDOrequest(UNS16 RPDOIndex) {
     UNS16 *pwCobId;
     const subindex *si;
     UNS8 size;
     ODCallback_t *callbacks;
 
-    if (!d->CurrentCommunicationState.csPDO) {
+    if (!ObjDict_Data.CurrentCommunicationState.csPDO) {
         return 0;
     }
 
@@ -151,7 +151,7 @@ UNS8 sendPDOrequest(CO_Data * d, UNS16 RPDOIndex) {
  **
  ** @return
  **/
-UNS8 proceedPDO(CO_Data * d, Message * m) {
+UNS8 proceedPDO(Message * m) {
     UNS8 numMap; /* Number of the mapped varable */
     UNS8 pMappingCount; /* count of mapped objects... */
     /* pointer to the var which is mapped to a pdo... */
@@ -232,11 +232,11 @@ UNS8 proceedPDO(CO_Data * d, Message * m) {
                     data_offset += ode_size;
                 }
             } /* end loop while on mapped variables */
-//       if (d->RxPDO_EventTimers) {
+//       if (ObjDict_Data.RxPDO_EventTimers) {
 // 	  TIMEVAL EventTimerDuration = *(UNS16 *)ObjDict_objdict[offsetObjdict].pSubindex[5].pObject;
 // 	  if(EventTimerDuration){
-// 	      DelAlarm (d->RxPDO_EventTimers[numPdo]);
-// 	      d->RxPDO_EventTimers[numPdo] = SetAlarm (numPdo, d->RxPDO_EventTimers_Handler, MS_TO_TIMEVAL (EventTimerDuration), 0);
+// 	      DelAlarm (ObjDict_Data.RxPDO_EventTimers[numPdo]);
+// 	      ObjDict_Data.RxPDO_EventTimers[numPdo] = SetAlarm (numPdo, ObjDict_Data.RxPDO_EventTimers_Handler, MS_TO_TIMEVAL (EventTimerDuration), 0);
 // 	  }
 //       }
             return 0;
@@ -286,7 +286,7 @@ UNS8 proceedPDO(CO_Data * d, Message * m) {
             }
 
             Message pdo;
-            if (buildPDO(d, numPdo, &pdo)) {
+            if (buildPDO(numPdo, &pdo)) {
                 MSG_ERR(0x1948, " Couldn't build TPDO number : ", numPdo);
                 return 0xFF;
             }
@@ -358,7 +358,7 @@ UNS8 DestBigEndian) {
 
 }
 
-static void sendPdo(CO_Data * d, UNS32 pdoNum, Message * pdo) {
+static void sendPdo(UNS32 pdoNum, Message * pdo) {
     /*store_as_last_message */
     ObjDict_PDO_status[pdoNum].last_message = *pdo;
     MSG_WAR(0x396D, "sendPDO cobId :", UNS16_LE(pdo->cob_id));
@@ -375,18 +375,18 @@ static void sendPdo(CO_Data * d, UNS32 pdoNum, Message * pdo) {
  ** @return
  **/
 
-UNS8 sendPDOevent(CO_Data * d) {
+UNS8 sendPDOevent() {
     /* Calls _sendPDOevent specifying it is not a sync event */
-    return _sendPDOevent(d, 0);
+    return _sendPDOevent(0);
 }
 
-UNS8 sendOnePDOevent(CO_Data * d, UNS8 pdoNum) {
+UNS8 sendOnePDOevent(UNS8 pdoNum) {
     const subindex *param_si;
     UNS8 si_size;
     ODCallback_t *callbacks;
     Message pdo;
 
-    if (!d->CurrentCommunicationState.csPDO || (ObjDict_PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED)) {
+    if (!ObjDict_Data.CurrentCommunicationState.csPDO || (ObjDict_PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED)) {
         return 0;
     }
 
@@ -395,7 +395,7 @@ UNS8 sendOnePDOevent(CO_Data * d, UNS8 pdoNum) {
     MSG_WAR(0x3968, "  PDO is on EVENT. Trans type : ", *((UNS8 *) param_si[2].pObject));
 
     memset(&pdo, 0, sizeof(pdo));
-    if (buildPDO(d, pdoNum, &pdo)) {
+    if (buildPDO(pdoNum, &pdo)) {
         MSG_ERR(0x3907, " Couldn't build TPDO number : ", pdoNum);
         return 0;
     }
@@ -432,7 +432,7 @@ UNS8 sendOnePDOevent(CO_Data * d, UNS8 pdoNum) {
             }
         }
         ObjDict_PDO_status[pdoNum].event_trigger = 0;
-        sendPdo(d, pdoNum, &pdo);
+        sendPdo(pdoNum, &pdo);
     }
     return 1;
 }
@@ -442,7 +442,7 @@ void PDOEventTimerAlarm(UNS8 pdoNum) {
     ObjDict_PDO_status[pdoNum].event_timer = TIMER_NONE;
     /* force emission of PDO by artificially changing last emitted */
     ObjDict_PDO_status[pdoNum].event_trigger = 1;
-    sendOnePDOevent(&ObjDict_Data, (UNS8) pdoNum);
+    sendOnePDOevent((UNS8) pdoNum);
 }
 
 void PDOInhibitTimerAlarm(UNS8 pdoNum) {
@@ -450,10 +450,10 @@ void PDOInhibitTimerAlarm(UNS8 pdoNum) {
     ObjDict_PDO_status[pdoNum].inhibit_timer = TIMER_NONE;
     /* Remove inhibit flag */
     ObjDict_PDO_status[pdoNum].transmit_type_parameter &= ~PDO_INHIBITED;
-    sendOnePDOevent(&ObjDict_Data, (UNS8) pdoNum);
+    sendOnePDOevent((UNS8) pdoNum);
 }
 
-// void _RxPDO_EventTimers_Handler(CO_Data *d, UNS32 pdoNum) {}
+// void _RxPDO_EventTimers_Handler(UNS32 pdoNum) {}
 
 /*!
  **
@@ -464,14 +464,14 @@ void PDOInhibitTimerAlarm(UNS8 pdoNum) {
  ** @return
  **/
 
-UNS8 _sendPDOevent(CO_Data * d, UNS8 isSyncEvent) {
+UNS8 _sendPDOevent(UNS8 isSyncEvent) {
     ; /* number of the actual processed pdo-nr. */
     UNS8 pTransmissionType;
     const subindex *param_si;
     UNS8 si_size;
     ODCallback_t *callbacks;
 
-    if (!d->CurrentCommunicationState.csPDO) {
+    if (!ObjDict_Data.CurrentCommunicationState.csPDO) {
         return 0;
     }
 
@@ -499,14 +499,14 @@ UNS8 _sendPDOevent(CO_Data * d, UNS8 isSyncEvent) {
             MSG_WAR(0x3964, "  PDO is on SYNCHRO. Trans type : ", pTransmissionType);
 
             memset(&pdo, 0, sizeof(pdo));
-            if (buildPDO(d, pdoNum, &pdo)) {
+            if (buildPDO(pdoNum, &pdo)) {
                 MSG_ERR(0x1906, " Couldn't build TPDO number : ", pdoNum);
                 continue;
             }
-            sendPdo(d, pdoNum, &pdo);
+            sendPdo(pdoNum, &pdo);
             /* If transmission RTR, with data sampled on SYNC */
         } else if (isSyncEvent && (pTransmissionType == TRANS_RTR_SYNC)) {
-            if (buildPDO(d, pdoNum, &ObjDict_PDO_status[pdoNum].last_message)) {
+            if (buildPDO(pdoNum, &ObjDict_PDO_status[pdoNum].last_message)) {
                 MSG_ERR(0x1966, " Couldn't build TPDO number : ", pdoNum);
                 ObjDict_PDO_status[pdoNum].transmit_type_parameter &= ~PDO_RTR_SYNC_READY;
             } else {
@@ -519,7 +519,7 @@ UNS8 _sendPDOevent(CO_Data * d, UNS8 isSyncEvent) {
                 || (!isSyncEvent
                         && (pTransmissionType == TRANS_EVENT_PROFILE || pTransmissionType == TRANS_EVENT_SPECIFIC)
                         && !(ObjDict_PDO_status[pdoNum].transmit_type_parameter & PDO_INHIBITED))) {
-            sendOnePDOevent(d, pdoNum);
+            sendOnePDOevent(pdoNum);
         } else {
             MSG_WAR(0x306C, "  PDO is not on EVENT or synchro or not at this SYNC. Trans type : ", *pTransmissionType);
         }
@@ -565,7 +565,7 @@ UNS16 bIndex, UNS8 bSubindex, UNS8 writeAccess) {
     return 0;
 }
 
-void PDOInit(CO_Data * d) {
+void PDOInit() {
     /* For each TPDO mapping parameters */
     UNS16 pdoIndex = 0x1800; /* OD index of TDPO */
     UNS8 size;
@@ -585,10 +585,10 @@ void PDOInit(CO_Data * d) {
     }
 
     /* Trigger a non-sync event */
-    _sendPDOevent(d, 0);
+    _sendPDOevent(0);
 }
 
-void PDOStop(CO_Data * d) {
+void PDOStop() {
     /* For each TPDO mapping parameters */
     UNS8 pdoNum = 0x00; /* number of the actual processed pdo-nr. */
     UNS16 pdoIndex = 0x1800; /* OD index of TDPO */

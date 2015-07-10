@@ -35,7 +35,7 @@
 
 
 /* ---------  prototypes --------- */
-/*#define SetAlarm(d, id, callback, value, period) printf("%s, %d, SetAlarm(%s, %s, %s, %s, %s)\n",__FILE__, __LINE__, #d, #id, #callback, #value, #period); _SetAlarm(d, id, callback, value, period)*/
+/*#define SetAlarm(id, callback, value, period) printf("%s, %d, SetAlarm(%s, %s, %s, %s, %s)\n",__FILE__, __LINE__, #d, #id, #callback, #value, #period); _SetAlarm(id, callback, value, period)*/
 /**
  * @ingroup timer
  * @brief Set an alarm to execute a callback function when expired.

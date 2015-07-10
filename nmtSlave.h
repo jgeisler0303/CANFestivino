@@ -39,7 +39,7 @@
  *  -  0 if OK 
  *  - -1 if the slave is not allowed, by its state, to receive the message
  */
-void proceedNMTstateChange(CO_Data* d, Message * m);
+void proceedNMTstateChange(Message * m);
 
 /** 
  * @brief Transmit the boot-Up frame when the slave is moving from initialization
@@ -47,6 +47,6 @@ void proceedNMTstateChange(CO_Data* d, Message * m);
  * @param *d Pointer on the CAN data structure
  * @return canSend(bus_id,&m)
  */
-UNS8 slaveSendBootUp(CO_Data* d);
+UNS8 slaveSendBootUp();
 
 #endif /* __nmtSlave_h__ */

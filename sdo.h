@@ -46,7 +46,7 @@ typedef enum {
     RXSTEP_INIT, RXSTEP_STARTED, RXSTEP_END
 }__attribute__ ((packed)) rxStep_t;
 
-typedef void (*SDOCallback_t)(CO_Data* d, UNS8 nodeId);
+typedef void (*SDOCallback_t)(UNS8 nodeId);
 
 /* The Transfer structure
  Used to store the different segments of
@@ -114,7 +114,7 @@ void SDOTimeoutAlarm(UNS8 id);
  * @brief Reset all SDO buffers.
  * @param *d Pointer on a CAN object data structure
  */
-void resetSDO(CO_Data* d);
+void resetSDO();
 
 /** 
  * @brief Copy the data received from the SDO line transfer to the object dictionary.
@@ -122,7 +122,7 @@ void resetSDO(CO_Data* d);
  * @param line SDO line
  * @return SDO error code if error. Else, returns 0.
  */
-UNS32 SDOlineToObjdict(CO_Data* d, UNS8 line);
+UNS32 SDOlineToObjdict(UNS8 line);
 
 /** 
  * @brief Copy the data from the object dictionary to the SDO line for a network transfer.
@@ -130,7 +130,7 @@ UNS32 SDOlineToObjdict(CO_Data* d, UNS8 line);
  * @param line SDO line
  * @return SDO error code if error. Else, returns 0.
  */
-UNS32 objdictToSDOline(CO_Data* d, UNS8 line);
+UNS32 objdictToSDOline(UNS8 line);
 
 /** 
  * @brief Copy data from an existant line in the argument "* data"
@@ -140,7 +140,7 @@ UNS32 objdictToSDOline(CO_Data* d, UNS8 line);
  * @param *data Pointer on the data
  * @return 0xFF if error. Else, returns 0.
  */
-UNS8 lineToSDO(CO_Data* d, UNS8 line, UNS32 nbBytes, UNS8 * data);
+UNS8 lineToSDO(UNS8 line, UNS32 nbBytes, UNS8 * data);
 
 /** 
  * @brief Add data to an existant line
@@ -150,7 +150,7 @@ UNS8 lineToSDO(CO_Data* d, UNS8 line, UNS32 nbBytes, UNS8 * data);
  * @param *data Pointer on the data
  * @return 0xFF if error. Else, returns 0.
  */
-UNS8 SDOtoLine(CO_Data* d, UNS8 line, UNS32 nbBytes, UNS8 * data);
+UNS8 SDOtoLine(UNS8 line, UNS32 nbBytes, UNS8 * data);
 
 /** 
  * @brief Called when an internal SDO abort occurs.
@@ -167,14 +167,14 @@ UNS8 SDOtoLine(CO_Data* d, UNS8 line, UNS32 nbBytes, UNS8 * data);
  * @param abortCode
  * @return 0
  */
-UNS8 failedSDO(CO_Data* d, UNS8 CliServNbr, UNS8 whoami, UNS16 index, UNS8 subIndex, UNS32 abortCode);
+UNS8 failedSDO(UNS8 CliServNbr, UNS8 whoami, UNS16 index, UNS8 subIndex, UNS32 abortCode);
 
 /** 
  * @brief Reset an unused line.
  * @param *d Pointer on a CAN object data structure
  * @param line SDO line
  */
-void resetSDOline(CO_Data* d, UNS8 line);
+void resetSDOline(UNS8 line);
 
 /** 
  * @brief Initialize some fields of the structure.
@@ -186,7 +186,7 @@ void resetSDOline(CO_Data* d, UNS8 line);
  * @param state
  * @return 0
  */
-UNS8 initSDOline(CO_Data* d, UNS8 line, UNS8 CliServNbr, UNS16 index, UNS8 subIndex, UNS8 state);
+UNS8 initSDOline(UNS8 line, UNS8 CliServNbr, UNS16 index, UNS8 subIndex, UNS8 state);
 
 /** 
  * @brief Search for an unused line in the transfers array
@@ -198,7 +198,7 @@ UNS8 initSDOline(CO_Data* d, UNS8 line, UNS8 CliServNbr, UNS16 index, UNS8 subIn
  * @param *line Pointer on a SDO line 
  * @return 0xFF if all the lines are on use. Else, return 0.
  */
-UNS8 getSDOfreeLine(CO_Data* d, UNS8 whoami, UNS8 *line);
+UNS8 getSDOfreeLine(UNS8 whoami, UNS8 *line);
 
 /** 
  * @brief Search for the line, in the transfers array, which contains the
@@ -209,7 +209,7 @@ UNS8 getSDOfreeLine(CO_Data* d, UNS8 whoami, UNS8 *line);
  * @param *line Pointer on a SDO line 
  * @return 0xFF if error.  Else, return 0
  */
-UNS8 getSDOlineOnUse(CO_Data* d, UNS8 CliServNbr, UNS8 whoami, UNS8 *line);
+UNS8 getSDOlineOnUse(UNS8 CliServNbr, UNS8 whoami, UNS8 *line);
 
 /** 
  * @brief Search for the line, in the transfers array, which contains the
@@ -224,7 +224,7 @@ UNS8 getSDOlineOnUse(CO_Data* d, UNS8 CliServNbr, UNS8 whoami, UNS8 *line);
  * @param *line Pointer on a SDO line
  * @return 0xFF if error.  Else, return 0
  */
-UNS8 getSDOlineToClose(CO_Data* d, UNS8 CliServNbr, UNS8 whoami, UNS8 *line);
+UNS8 getSDOlineToClose(UNS8 CliServNbr, UNS8 whoami, UNS8 *line);
 
 /** 
  * @brief Close a transmission.
@@ -232,7 +232,7 @@ UNS8 getSDOlineToClose(CO_Data* d, UNS8 CliServNbr, UNS8 whoami, UNS8 *line);
  * @param CliServNbr Client or Server object involved
  * @param whoami Line opened as SDO_CLIENT or SDO_SERVER
  */
-UNS8 closeSDOtransfer(CO_Data* d, UNS8 CliServNbr, UNS8 whoami);
+UNS8 closeSDOtransfer(UNS8 CliServNbr, UNS8 whoami);
 
 /** 
  * @brief Bytes in the line structure which must be transmited (or received)
@@ -241,7 +241,7 @@ UNS8 closeSDOtransfer(CO_Data* d, UNS8 CliServNbr, UNS8 whoami);
  * @param *nbBytes Pointer on nbBytes
  * @return 0.
  */
-UNS8 getSDOlineRestBytes(CO_Data* d, UNS8 line, UNS32 * nbBytes);
+UNS8 getSDOlineRestBytes(UNS8 line, UNS32 * nbBytes);
 
 /** 
  * @brief Store in the line structure the nb of bytes which must be transmited (or received)
@@ -250,7 +250,7 @@ UNS8 getSDOlineRestBytes(CO_Data* d, UNS8 line, UNS32 * nbBytes);
  * @param nbBytes
  * @return 0 if success, 0xFF if error.
  */
-UNS8 setSDOlineRestBytes(CO_Data* d, UNS8 line, UNS32 nbBytes);
+UNS8 setSDOlineRestBytes(UNS8 line, UNS32 nbBytes);
 
 /**
  * @brief Transmit a SDO frame on the bus bus_id
@@ -260,7 +260,7 @@ UNS8 setSDOlineRestBytes(CO_Data* d, UNS8 line, UNS32 nbBytes);
  * @param data Array of the 8 bytes to transmit
  * @return canSend(bus_id,&m) or 0xFF if error.
  */
-UNS8 sendSDO(CO_Data* d, UNS8 whoami, UNS8 CliServNbr, UNS8 *pData);
+UNS8 sendSDO(UNS8 whoami, UNS8 CliServNbr, UNS8 *pData);
 
 /** 
  * @brief Transmit a SDO error to the client. The reasons may be :
@@ -276,7 +276,7 @@ UNS8 sendSDO(CO_Data* d, UNS8 whoami, UNS8 CliServNbr, UNS8 *pData);
  * @param abortCode
  * @return 0
  */
-UNS8 sendSDOabort(CO_Data* d, UNS8 whoami, UNS8 CliServNbr, UNS16 index, UNS8 subIndex, UNS32 abortCode);
+UNS8 sendSDOabort(UNS8 whoami, UNS8 CliServNbr, UNS16 index, UNS8 subIndex, UNS32 abortCode);
 
 /** 
  * @brief Treat a SDO frame reception
@@ -288,7 +288,7 @@ UNS8 sendSDOabort(CO_Data* d, UNS8 whoami, UNS8 CliServNbr, UNS16 index, UNS8 su
  *         - 0x80 if transfer aborted by the server
  *         - 0x0  ok
  */
-UNS8 proceedSDO(CO_Data* d, Message *m);
+UNS8 proceedSDO(Message *m);
 
 /** 
  * @ingroup sdo
@@ -305,7 +305,7 @@ UNS8 proceedSDO(CO_Data* d, Message *m);
  * - 0xFE is returned when no sdo client to communicate with node.
  * - 0xFF is returned when error occurs.
  */
-UNS8 writeNetworkDict(CO_Data* d, UNS8 nodeId, UNS16 index,
+UNS8 writeNetworkDict(UNS8 nodeId, UNS16 index,
 UNS8 subIndex, UNS32 count, UNS8 dataType, void *data, UNS8 useBlockMode);
 
 /** 
@@ -326,7 +326,7 @@ UNS8 subIndex, UNS32 count, UNS8 dataType, void *data, UNS8 useBlockMode);
  * - 0xFE is returned when no sdo client to communicate with node.
  * - 0xFF is returned when error occurs.
  */
-UNS8 writeNetworkDictCallBack(CO_Data* d, UNS8 nodeId, UNS16 index,
+UNS8 writeNetworkDictCallBack(UNS8 nodeId, UNS16 index,
 UNS8 subIndex, UNS32 count, UNS8 dataType, void *data, SDOCallback_t Callback, UNS8 useBlockMode);
 
 /**
@@ -350,7 +350,7 @@ UNS8 subIndex, UNS32 count, UNS8 dataType, void *data, SDOCallback_t Callback, U
  * - 0 is returned upon success.
  * - 0xFF is returned when error occurs.
  */
-UNS8 writeNetworkDictCallBackAI(CO_Data* d, UNS8 nodeId, UNS16 index,
+UNS8 writeNetworkDictCallBackAI(UNS8 nodeId, UNS16 index,
 UNS8 subIndex, UNS32 count, UNS8 dataType, void *data, SDOCallback_t Callback, UNS8 endianize, UNS8 useBlockMode);
 
 /**
@@ -366,7 +366,7 @@ UNS8 subIndex, UNS32 count, UNS8 dataType, void *data, SDOCallback_t Callback, U
  * - 0xFE is returned when no sdo client to communicate with node.
  * - 0xFF is returned when error occurs.
  */
-UNS8 readNetworkDict(CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subIndex, UNS8 dataType, UNS8 useBlockMode);
+UNS8 readNetworkDict(UNS8 nodeId, UNS16 index, UNS8 subIndex, UNS8 dataType, UNS8 useBlockMode);
 
 /** 
  * @ingroup sdo
@@ -384,7 +384,7 @@ UNS8 readNetworkDict(CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subIndex, UNS8 d
  * - 0xFE is returned when no sdo client to communicate with node.
  * - 0xFF is returned when error occurs.
  */
-UNS8 readNetworkDictCallback(CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subIndex, UNS8 dataType, SDOCallback_t Callback, UNS8 useBlockMode);
+UNS8 readNetworkDictCallback(UNS8 nodeId, UNS16 index, UNS8 subIndex, UNS8 dataType, SDOCallback_t Callback, UNS8 useBlockMode);
 
 /** 
  * @ingroup sdo
@@ -402,7 +402,7 @@ UNS8 readNetworkDictCallback(CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subIndex
  * - 0 is returned upon success.
  * - 0xFF is returned when error occurs.
  */
-UNS8 readNetworkDictCallbackAI(CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subIndex, UNS8 dataType, SDOCallback_t Callback, UNS8 useBlockMode);
+UNS8 readNetworkDictCallbackAI(UNS8 nodeId, UNS16 index, UNS8 subIndex, UNS8 dataType, SDOCallback_t Callback, UNS8 useBlockMode);
 
 /** 
  * @ingroup sdo
@@ -432,7 +432,7 @@ UNS8 readNetworkDictCallbackAI(CO_Data* d, UNS8 nodeId, UNS16 index, UNS8 subInd
  * while (getReadResultNetworkDict (0, 0x05, &data, &size) == SDO_UPLOAD_IN_PROGRESS);
  * @endcode
  */
-UNS8 getReadResultNetworkDict(CO_Data* d, UNS8 nodeId, void* data, UNS32 *size, UNS32 * abortCode);
+UNS8 getReadResultNetworkDict(UNS8 nodeId, void* data, UNS32 *size, UNS32 * abortCode);
 
 /**
  * @ingroup sdo
@@ -460,6 +460,6 @@ UNS8 getReadResultNetworkDict(CO_Data* d, UNS8 nodeId, void* data, UNS32 *size, 
  * while (getWriteResultNetworkDict (0, 0x05, &abortCode) == SDO_DOWNLOAD_IN_PROGRESS);
  * @endcode
  */
-UNS8 getWriteResultNetworkDict(CO_Data* d, UNS8 nodeId, UNS32 * abortCode);
+UNS8 getWriteResultNetworkDict(UNS8 nodeId, UNS32 * abortCode);
 
 #endif

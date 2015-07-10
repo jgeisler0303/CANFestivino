@@ -27,8 +27,8 @@ void initCAN() {
   while(CAN.begin(CAN_500KBPS)!=0) delay(1000);
 
   CAN.init_Mask(0,0, 0x007E); // allow two consecutive ids
-  CAN.init_Filt(0,0, getNodeId(&ObjDict_Data)); // RxPDO and SDO
-  CAN.init_Filt(1,0, getNodeId(&ObjDict_Data)); // same
+  CAN.init_Filt(0,0, getNodeId()); // RxPDO and SDO
+  CAN.init_Filt(1,0, getNodeId()); // same
 
   CAN.init_Mask(1,0, 0x07FF);
   CAN.init_Filt(2,0, 0x0000); // NMT

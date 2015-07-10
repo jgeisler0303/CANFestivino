@@ -92,7 +92,7 @@ struct struct_CO_Data {
     // s_PDO_status *PDO_status;
     UNS8 currentPDO;
     // TIMER_HANDLE *RxPDO_EventTimers;
-    // void (*RxPDO_EventTimers_Handler)(CO_Data*, UNS32);
+    // void (*RxPDO_EventTimers_Handler)(UNS32);
     // const quick_index *firstIndex;
     // const quick_index *lastIndex;
     // const UNS16 *ObjdictSize;
@@ -110,8 +110,8 @@ struct struct_CO_Data {
     // preOperational_t preOperational;
     // operational_t operational;
     // stopped_t stopped;
-    // void (*NMT_Slave_Node_Reset_Callback)(CO_Data*);
-    // void (*NMT_Slave_Communications_Reset_Callback)(CO_Data*);
+    // void (*NMT_Slave_Node_Reset_Callback)();
+    // void (*NMT_Slave_Communications_Reset_Callback)();
 
     /* NMT-heartbeat */
     // UNS8 *ConsumerHeartbeatCount;

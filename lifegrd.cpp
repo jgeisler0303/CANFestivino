@@ -36,12 +36,12 @@
 #include "lifegrd.h"
 #include "sysdep.h"
 
-// e_nodeState getNodeState (CO_Data* d, UNS8 nodeId)
+// e_nodeState getNodeState (UNS8 nodeId)
 // {
 //   e_nodeState networkNodeState = Unknown_state;
 //   #if NMT_MAX_NODE_ID>0
 //   if(nodeId < NMT_MAX_NODE_ID)
-//     networkNodeState = d->NMTable[nodeId];
+//     networkNodeState = ObjDict_Data.NMTable[nodeId];
 //   #endif
 //   return networkNodeState;
 // }
@@ -53,23 +53,23 @@
  ** @param id
  * @ingroup heartbeato
  **/
-void ConsumerHeartbeatAlarm(CO_Data* d, UNS32 id) {
+void ConsumerHeartbeatAlarm(UNS32 id) {
 #ifdef CO_ENABLE_CONSUMER_HEART_BEAT
     UNS8 nodeId = (UNS8)(((ConsumerHeartbeatEntries[id]) & (UNS32)0x00FF0000) >> (UNS8)16);
     /*MSG_WAR(0x00, "ConsumerHearbeatAlarm", 0x00);*/
 
     /* timer have been notified and is now free (non periodic)*/
     /* -> avoid deleting re-assigned timer if message is received too late*/
-    d->ConsumerHeartBeatTimers[id]=TIMER_NONE;
+    ObjDict_Data.ConsumerHeartBeatTimers[id]=TIMER_NONE;
 
     /* set node state */
-    d->NMTable[nodeId] = Disconnected;
+    ObjDict_Data.NMTable[nodeId] = Disconnected;
     /*! call heartbeat error with NodeId */
-    (*d->heartbeatError)(d, nodeId);
+    (*ObjDict_Data.heartbeatError)(nodeId);
 #endif
 }
 
-void proceedNODE_GUARD(CO_Data* d, Message* m) {
+void proceedNODE_GUARD(Message* m) {
 #ifdef CO_ENABLE_NODE_GUARD
     UNS8 nodeId = (UNS8) GET_NODE_ID((*m));
 
@@ -85,23 +85,23 @@ void proceedNODE_GUARD(CO_Data* d, Message* m) {
          ** Only answer to the NMT NodeGuarding request, the master is
          ** not checked (not implemented)
          */
-        if (nodeId == *d->bDeviceNodeId )
+        if (nodeId == *ObjDict_Data.bDeviceNodeId )
         {
             Message msg;
-            UNS16 tmp = *d->bDeviceNodeId + 0x700;
+            UNS16 tmp = *ObjDict_Data.bDeviceNodeId + 0x700;
             msg.cob_id = UNS16_LE(tmp);
             msg.len = (UNS8)0x01;
             msg.rtr = 0;
-            msg.data[0] = d->nodeState;
-            if (d->toggle)
+            msg.data[0] = ObjDict_Data.nodeState;
+            if (ObjDict_Data.toggle)
             {
                 msg.data[0] |= 0x80;
-                d->toggle = 0;
+                ObjDict_Data.toggle = 0;
             }
             else
-            d->toggle = 1;
+            ObjDict_Data.toggle = 1;
             /* send the nodeguard response. */
-            MSG_WAR(0x3130, "Sending NMT Nodeguard to master, state: ", d->nodeState);
+            MSG_WAR(0x3130, "Sending NMT Nodeguard to master, state: ", ObjDict_Data.nodeState);
             canSend(&msg );
         }
 
@@ -114,17 +114,17 @@ void proceedNODE_GUARD(CO_Data* d, Message* m) {
         /*!
          ** Record node response for node guarding service
          */
-        d->nodeGuardStatus[nodeId] = *d->LifeTimeFactor;
+        ObjDict_Data.nodeGuardStatus[nodeId] = *ObjDict_Data.LifeTimeFactor;
 
-        if (d->NMTable[nodeId] != newNodeState)
+        if (ObjDict_Data.NMTable[nodeId] != newNodeState)
         {
-            (*d->post_SlaveStateChange)(d, nodeId, newNodeState);
+            (*ObjDict_Data.post_SlaveStateChange)(nodeId, newNodeState);
             /* the slave's state receievd is stored in the NMTable */
-            d->NMTable[nodeId] = newNodeState;
+            ObjDict_Data.NMTable[nodeId] = newNodeState;
         }
 
         /* Boot-Up frame reception */
-        if ( d->NMTable[nodeId] == Initialisation)
+        if ( ObjDict_Data.NMTable[nodeId] == Initialisation)
         {
             /*
              ** The device send the boot-up message (Initialisation)
@@ -133,10 +133,10 @@ void proceedNODE_GUARD(CO_Data* d, Message* m) {
              */
             MSG_WAR(0x3100, "The NMT is a bootup from node : ", nodeId);
             /* call post SlaveBootup with NodeId */
-            (*d->post_SlaveBootup)(d, nodeId);
+            (*ObjDict_Data.post_SlaveBootup)(nodeId);
         }
 
-        if( d->NMTable[nodeId] != Unknown_state ) {
+        if( ObjDict_Data.NMTable[nodeId] != Unknown_state ) {
             UNS8 index, ConsumerHeartBeat_nodeId;
             for( index = (UNS8)0x00; index < ConsumerHeartbeatCount; index++ )
             {
@@ -145,8 +145,8 @@ void proceedNODE_GUARD(CO_Data* d, Message* m) {
                 {
                     TIMEVAL time = ( (ConsumerHeartbeatEntries[index]) & (UNS32)0x0000FFFF );
                     /* Renew alarm for next heartbeat. */
-                    DelAlarm(d->ConsumerHeartBeatTimers[index]);
-                    d->ConsumerHeartBeatTimers[index] = SetAlarm(index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
+                    DelAlarm(ObjDict_Data.ConsumerHeartBeatTimers[index]);
+                    ObjDict_Data.ConsumerHeartBeatTimers[index] = SetAlarm(index, &ConsumerHeartbeatAlarm, MS_TO_TIMEVAL(time), 0);
                 }
             }
         }
@@ -176,7 +176,7 @@ void ProducerHeartbeatAlarm(UNS8 id) {
         msg.rtr = 0;
         msg.data[0] = ObjDict_Data.nodeState; /* No toggle for heartbeat !*/
         /* send the heartbeat */
-        MSG_WAR(0x3130, "Producing heartbeat: ", d->nodeState);
+        MSG_WAR(0x3130, "Producing heartbeat: ", ObjDict_Data.nodeState);
         canSend(&msg);
 
     } else {
@@ -197,9 +197,9 @@ void ProducerHeartbeatAlarm(UNS8 id) {
  * @param id
  * @ingroup nodeguardo
  */
-void GuardTimeAlarm(CO_Data* d, UNS32 id) {
+void GuardTimeAlarm(UNS32 id) {
 #ifdef CO_ENABLE_NODE_GUARD
-    if (*d->GuardTime) {
+    if (*ObjDict_Data.GuardTime) {
         UNS8 i;
 
         MSG_WAR(0x00, "Producing nodeguard-requests: ", 0);
@@ -208,33 +208,33 @@ void GuardTimeAlarm(CO_Data* d, UNS32 id) {
             /** Send node guard request to all nodes except this node, if the 
              * node state is not "Unknown_state"
              */
-            if (d->NMTable[i] != Unknown_state && i != *d->bDeviceNodeId) {
+            if (ObjDict_Data.NMTable[i] != Unknown_state && i != *ObjDict_Data.bDeviceNodeId) {
 
                 /** Check if the node has confirmed the guarding request within
                  * the LifeTime (GuardTime x LifeTimeFactor)
                  */
-                if (d->nodeGuardStatus[i] <= 0) {
+                if (ObjDict_Data.nodeGuardStatus[i] <= 0) {
 
                     MSG_WAR(0x00, "Node Guard alarm for nodeId : ", i);
 
                     // Call error-callback function
-                    if (*d->nodeguardError) {
-                        (*d->nodeguardError)(d, i);
+                    if (*ObjDict_Data.nodeguardError) {
+                        (*ObjDict_Data.nodeguardError)(i);
                     }
 
                     // Mark node as disconnected
-                    d->NMTable[i] = Disconnected;
+                    ObjDict_Data.NMTable[i] = Disconnected;
 
                 }
 
-                d->nodeGuardStatus[i]--;
+                ObjDict_Data.nodeGuardStatus[i]--;
 
-                masterSendNMTnodeguard(d, i);
+                masterSendNMTnodeguard(i);
 
             }
         }
     } else {
-        d->GuardTimeTimer = DelAlarm(d->GuardTimeTimer);
+        ObjDict_Data.GuardTimeTimer = DelAlarm(ObjDict_Data.GuardTimeTimer);
     }
 #endif
 }
@@ -299,23 +299,23 @@ void heartbeatInit() {
     }
 }
 
-void nodeguardInit(CO_Data* d) {
+void nodeguardInit() {
 #ifdef CO_ENABLE_NODE_GUARD
 
-    RegisterSetODentryCallBack(d, 0x100C, 0x00, &OnNodeGuardUpdate);
-    RegisterSetODentryCallBack(d, 0x100D, 0x00, &OnNodeGuardUpdate);
+    RegisterSetODentryCallBack(0x100C, 0x00, &OnNodeGuardUpdate);
+    RegisterSetODentryCallBack(0x100D, 0x00, &OnNodeGuardUpdate);
 
-    if (*d->GuardTime && *d->LifeTimeFactor) {
+    if (*ObjDict_Data.GuardTime && *ObjDict_Data.LifeTimeFactor) {
         UNS8 i;
 
-        TIMEVAL time = *d->GuardTime;
-        d->GuardTimeTimer = SetAlarm(0, &GuardTimeAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
+        TIMEVAL time = *ObjDict_Data.GuardTime;
+        ObjDict_Data.GuardTimeTimer = SetAlarm(0, &GuardTimeAlarm, MS_TO_TIMEVAL(time), MS_TO_TIMEVAL(time));
         MSG_WAR(0x0, "GuardTime: ", time);
 
         for (i = 0; i < NMT_MAX_NODE_ID; i++) {
             /** Set initial value for the nodes */
-            if (d->NMTable[i] != Unknown_state && i != *d->bDeviceNodeId) {
-                d->nodeGuardStatus[i] = *d->LifeTimeFactor;
+            if (ObjDict_Data.NMTable[i] != Unknown_state && i != *ObjDict_Data.bDeviceNodeId) {
+                ObjDict_Data.nodeGuardStatus[i] = *ObjDict_Data.LifeTimeFactor;
             }
         }
 
@@ -336,26 +336,26 @@ void heartbeatStop() {
     ObjDict_Data.ProducerHeartBeatTimer = DelAlarm(ObjDict_Data.ProducerHeartBeatTimer);
 }
 
-void nodeguardStop(CO_Data* d) {
-    d->GuardTimeTimer = DelAlarm(d->GuardTimeTimer);
+void nodeguardStop() {
+    ObjDict_Data.GuardTimeTimer = DelAlarm(ObjDict_Data.GuardTimeTimer);
 }
 
-void lifeGuardInit(CO_Data* d) {
+void lifeGuardInit() {
     heartbeatInit();
-    nodeguardInit(d);
+    nodeguardInit();
 }
 
-void lifeGuardStop(CO_Data* d) {
+void lifeGuardStop() {
     heartbeatStop();
-    nodeguardStop(d);
+    nodeguardStop();
 }
 
-void _heartbeatError(CO_Data* d, UNS8 heartbeatID) {
+void _heartbeatError(UNS8 heartbeatID) {
 }
-void _post_SlaveBootup(CO_Data* d, UNS8 SlaveID) {
+void _post_SlaveBootup(UNS8 SlaveID) {
 }
-void _post_SlaveStateChange(CO_Data* d, UNS8 nodeId, e_nodeState newNodeState) {
+void _post_SlaveStateChange(UNS8 nodeId, e_nodeState newNodeState) {
 }
-void _nodeguardError(CO_Data* d, UNS8 id) {
+void _nodeguardError(UNS8 id) {
 }
 

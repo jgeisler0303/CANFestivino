@@ -39,7 +39,7 @@
  ** @param d
  ** @param newCommunicationState
  **/
-void switchCommunicationState(CO_Data* d, s_state_communication *newCommunicationState);
+void switchCommunicationState(s_state_communication *newCommunicationState);
 
 /*!                                                                                                
  **
@@ -48,8 +48,8 @@ void switchCommunicationState(CO_Data* d, s_state_communication *newCommunicatio
  **
  ** @return
  **/
-e_nodeState getState(CO_Data* d) {
-    return d->nodeState;
+e_nodeState getState() {
+    return ObjDict_Data.nodeState;
 }
 
 /*!                                                                                                
@@ -58,17 +58,17 @@ e_nodeState getState(CO_Data* d) {
  ** @param d
  ** @param m
  **/
-void canDispatch(CO_Data* d, Message *m) {
+void canDispatch(Message *m) {
     UNS16 cob_id = UNS16_LE(m->cob_id);
     switch (cob_id >> 7) {
         case SYNC: /* can be a SYNC or a EMCY message */
             if (cob_id == 0x080) /* SYNC */
             {
-                if (d->CurrentCommunicationState.csSYNC)
-                    proceedSYNC(d);
+                if (ObjDict_Data.CurrentCommunicationState.csSYNC)
+                    proceedSYNC();
             } else /* EMCY */
-            if (d->CurrentCommunicationState.csEmergency)
-                proceedEMCY(d, m);
+            if (ObjDict_Data.CurrentCommunicationState.csEmergency)
+                proceedEMCY(m);
             break;
             /* case TIME_STAMP: */
         case PDO1tx:
@@ -79,33 +79,33 @@ void canDispatch(CO_Data* d, Message *m) {
         case PDO3rx:
         case PDO4tx:
         case PDO4rx:
-            if (d->CurrentCommunicationState.csPDO)
-                proceedPDO(d, m);
+            if (ObjDict_Data.CurrentCommunicationState.csPDO)
+                proceedPDO(m);
             break;
         case SDOtx:
         case SDOrx:
-            if (d->CurrentCommunicationState.csSDO)
-                proceedSDO(d, m);
+            if (ObjDict_Data.CurrentCommunicationState.csSDO)
+                proceedSDO(m);
             break;
         case NODE_GUARD:
-            if (d->CurrentCommunicationState.csLifeGuard)
-                proceedNODE_GUARD(d, m);
+            if (ObjDict_Data.CurrentCommunicationState.csLifeGuard)
+                proceedNODE_GUARD(m);
             break;
         case NMT:
             // if (ObjDict_iam_a_slave) {
-            proceedNMTstateChange(d, m);
+            proceedNMTstateChange(m);
             // }
             break;
 #ifdef CO_ENABLE_LSS
             case LSS:
-            if (!d->CurrentCommunicationState.csLSS)break;
+            if (!ObjDict_Data.CurrentCommunicationState.csLSS)break;
             if ((*(ObjDict_iam_a_slave)) && cob_id==MLSS_ADRESS)
             {
-                proceedLSS_Slave(d,m);
+                proceedLSS_Slave(m);
             }
             else if(!(*(ObjDict_iam_a_slave)) && cob_id==SLSS_ADRESS)
             {
-                proceedLSS_Master(d,m);
+                proceedLSS_Master(m);
             }
             break;
 #endif
@@ -113,13 +113,13 @@ void canDispatch(CO_Data* d, Message *m) {
 }
 
 #define StartOrStop(CommType, FuncStart, FuncStop) \
-	if(newCommunicationState->CommType && d->CurrentCommunicationState.CommType == 0){\
+	if(newCommunicationState->CommType && ObjDict_Data.CurrentCommunicationState.CommType == 0){\
 		MSG_WAR(0x9999,#FuncStart, 9999);\
-		d->CurrentCommunicationState.CommType = 1;\
+		ObjDict_Data.CurrentCommunicationState.CommType = 1;\
 		FuncStart;\
-	}else if(!newCommunicationState->CommType && d->CurrentCommunicationState.CommType == 1){\
+	}else if(!newCommunicationState->CommType && ObjDict_Data.CurrentCommunicationState.CommType == 1){\
 		MSG_WAR(0x9999,#FuncStop, 9999);\
-		d->CurrentCommunicationState.CommType = 0;\
+		ObjDict_Data.CurrentCommunicationState.CommType = 0;\
 		FuncStop;\
 	}
 #define None
@@ -130,16 +130,16 @@ void canDispatch(CO_Data* d, Message *m) {
  ** @param d
  ** @param newCommunicationState
  **/
-void switchCommunicationState(CO_Data* d, s_state_communication *newCommunicationState) {
+void switchCommunicationState(s_state_communication *newCommunicationState) {
 #ifdef CO_ENABLE_LSS
-    StartOrStop(csLSS, startLSS(d), stopLSS(d))
+    StartOrStop(csLSS, startLSS(), stopLSS())
 #endif
-    StartOrStop(csSDO, None, resetSDO(d))
-    StartOrStop(csSYNC, startSYNC(d), stopSYNC(d))
-    StartOrStop(csLifeGuard, lifeGuardInit(d), lifeGuardStop(d))
-    StartOrStop(csEmergency, emergencyInit(d), emergencyStop(d))
-    StartOrStop(csPDO, PDOInit(d), PDOStop(d))
-    StartOrStop(csBoot_Up, None, slaveSendBootUp(d))
+    StartOrStop(csSDO, None, resetSDO())
+    StartOrStop(csSYNC, startSYNC(), stopSYNC())
+    StartOrStop(csLifeGuard, lifeGuardInit(), lifeGuardStop())
+    StartOrStop(csEmergency, emergencyInit(), emergencyStop())
+    StartOrStop(csPDO, PDOInit(), PDOStop())
+    StartOrStop(csBoot_Up, None, slaveSendBootUp())
 }
 
 /*!                                                                                                
@@ -150,53 +150,53 @@ void switchCommunicationState(CO_Data* d, s_state_communication *newCommunicatio
  **
  ** @return
  **/
-UNS8 setState(CO_Data* d, e_nodeState newState) {
-    if (newState != d->nodeState) {
+UNS8 setState(e_nodeState newState) {
+    if (newState != ObjDict_Data.nodeState) {
         switch (newState) {
             case Initialisation: {
                 s_state_communication newCommunicationState = { 1, 0, 0, 0, 0, 0, 0 };
-                d->nodeState = Initialisation;
-                switchCommunicationState(d, &newCommunicationState);
+                ObjDict_Data.nodeState = Initialisation;
+                switchCommunicationState(&newCommunicationState);
                 /* call user app init callback now. */
-                /* d->initialisation MUST NOT CALL SetState */
-                // (*d->initialisation)(d);
+                /* ObjDict_Data.initialisation MUST NOT CALL SetState */
+                // (*ObjDict_Data.initialisation)();
             }
 
                 /* Automatic transition - No break statement ! */
                 /* Transition from Initialisation to Pre_operational */
                 /* is automatic as defined in DS301. */
-                /* App don't have to call SetState(d, Pre_operational) */
+                /* App don't have to call SetState(Pre_operational) */
 
             case Pre_operational: {
 
                 s_state_communication newCommunicationState = { 0, 1, 1, 1, 1, 0, 1 };
-                d->nodeState = Pre_operational;
-                switchCommunicationState(d, &newCommunicationState);
-                // (*d->preOperational)(d);
+                ObjDict_Data.nodeState = Pre_operational;
+                switchCommunicationState(&newCommunicationState);
+                // (*ObjDict_Data.preOperational)();
             }
                 break;
 
             case Operational:
-                if (d->nodeState == Initialisation)
+                if (ObjDict_Data.nodeState == Initialisation)
                     return 0xFF;
                 {
                     s_state_communication newCommunicationState = { 0, 1, 1, 1, 1, 1, 0 };
-                    d->nodeState = Operational;
+                    ObjDict_Data.nodeState = Operational;
                     newState = Operational;
-                    switchCommunicationState(d, &newCommunicationState);
-                    // (*d->operational)(d);
+                    switchCommunicationState(&newCommunicationState);
+                    // (*ObjDict_Data.operational)();
                 }
                 break;
 
             case Stopped:
-                if (d->nodeState == Initialisation)
+                if (ObjDict_Data.nodeState == Initialisation)
                     return 0xFF;
                 {
                     s_state_communication newCommunicationState = { 0, 0, 0, 0, 1, 0, 1 };
-                    d->nodeState = Stopped;
+                    ObjDict_Data.nodeState = Stopped;
                     newState = Stopped;
-                    switchCommunicationState(d, &newCommunicationState);
-                    // (*d->stopped)(d);
+                    switchCommunicationState(&newCommunicationState);
+                    // (*ObjDict_Data.stopped)();
                 }
                 break;
             default:
@@ -205,9 +205,9 @@ UNS8 setState(CO_Data* d, e_nodeState newState) {
         }/* end switch case */
 
     }
-    /* d->nodeState contains the final state */
+    /* ObjDict_Data.nodeState contains the final state */
     /* may not be the requested state */
-    return d->nodeState;
+    return ObjDict_Data.nodeState;
 }
 
 /*!                                                                                                
@@ -217,7 +217,7 @@ UNS8 setState(CO_Data* d, e_nodeState newState) {
  **
  ** @return
  **/
-UNS8 getNodeId(CO_Data* d) {
+UNS8 getNodeId() {
     return ObjDict_bDeviceNodeId;
 }
 
@@ -228,15 +228,15 @@ UNS8 getNodeId(CO_Data* d) {
  ** @param d
  ** @param nodeId
  **/
-void setNodeId(CO_Data* d, UNS8 nodeId) {
+void setNodeId(UNS8 nodeId) {
     const subindex *si;
     UNS8 si_size;
     ODCallback_t *callbacks;
 
 #ifdef CO_ENABLE_LSS
-    d->lss_transfer.nodeID=nodeId;
+    ObjDict_Data.lss_transfer.nodeID=nodeId;
     if(nodeId==0xFF) {
-        *d->bDeviceNodeId = nodeId;
+        *ObjDict_Data.bDeviceNodeId = nodeId;
         return;
     }
     else
@@ -248,12 +248,12 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
 
     if (!(si= ObjDict_scanIndexOD(0x1200, &si_size, &callbacks))) {
         /* Adjust COB-ID Client->Server (rx) only id already set to default value or id not valid (id==0xFF)*/
-        if ((*(UNS16*) si[1].pObject == 0x600 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
+        if ((*(UNS16*) si[1].pObject == 0x600 + *ObjDict_Data.bDeviceNodeId) || (*ObjDict_Data.bDeviceNodeId == 0xFF)) {
             /* cob_id_client = 0x600 + nodeId; */
             *(UNS16*) si[1].pObject = 0x600 + nodeId;
         }
         /* Adjust COB-ID Server -> Client (tx) only id already set to default value or id not valid (id==0xFF)*/
-        if ((*(UNS16*) si[2].pObject == 0x580 + *d->bDeviceNodeId) || (*d->bDeviceNodeId == 0xFF)) {
+        if ((*(UNS16*) si[2].pObject == 0x580 + *ObjDict_Data.bDeviceNodeId) || (*ObjDict_Data.bDeviceNodeId == 0xFF)) {
             /* cob_id_server = 0x580 + nodeId; */
             *(UNS16*) si[2].pObject = 0x580 + nodeId;
         }
@@ -272,8 +272,8 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
         UNS32 cobID[] = {0x200, 0x300, 0x400, 0x500};
         while ((si= ObjDict_scanIndexOD(0x1400+i, &si_size, &callbacks)) && (i < 4)) {
             if ((*(UNS16*) si[1].pObject
-                            == cobID[i] + *d->bDeviceNodeId)
-                    || (*d->bDeviceNodeId == 0xFF))
+                            == cobID[i] + *ObjDict_Data.bDeviceNodeId)
+                    || (*ObjDict_Data.bDeviceNodeId == 0xFF))
             *(UNS16*) si[1].pObject = cobID[i]
             + nodeId;
             i++;
@@ -286,8 +286,8 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
         i = 0;
         while ((si= ObjDict_scanIndexOD(0x1800+i, &si_size, &callbacks)) && (i < 4)) {
             if ((*(UNS16*) si[1].pObject
-                            == cobID[i] + *d->bDeviceNodeId)
-                    || (*d->bDeviceNodeId == 0xFF))
+                            == cobID[i] + *ObjDict_Data.bDeviceNodeId)
+                    || (*ObjDict_Data.bDeviceNodeId == 0xFF))
             *(UNS16*) si[1].pObject = cobID[i]
             + nodeId;
             i++;
@@ -295,25 +295,25 @@ void setNodeId(CO_Data* d, UNS8 nodeId) {
     }
 
     /* Update EMCY COB-ID if already set to default*/
-    if ((error_cobid == *d->bDeviceNodeId + 0x80)
-            || (*d->bDeviceNodeId == 0xFF))
+    if ((error_cobid == *ObjDict_Data.bDeviceNodeId + 0x80)
+            || (*ObjDict_Data.bDeviceNodeId == 0xFF))
     error_cobid = nodeId + 0x80;
 
     /* bDeviceNodeId is defined in the object dictionary. */
-    *d->bDeviceNodeId = nodeId;
+    *ObjDict_Data.bDeviceNodeId = nodeId;
 }
 #endif
 
-// void _initialisation(CO_Data* d) {}
+// void _initialisation() {}
 
-// void _preOperational(CO_Data* d) {
+// void _preOperational() {
 // #ifdef CO_ENABLE_MASTER
 // 	if (!(*(ObjDict_iam_a_slave))) {
-// 		masterSendNMTstateChange(d, 0, NMT_Reset_Node);
+// 		masterSendNMTstateChange(0, NMT_Reset_Node);
 // 	}
 // #endif
 // }
 
-// void _operational(CO_Data* d) {}
+// void _operational() {}
 
-// void _stopped(CO_Data* d) {}
+// void _stopped() {}

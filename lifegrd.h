@@ -55,17 +55,17 @@
 #include "applicfg.h"
 #include "states.h"
 
-typedef void (*heartbeatError_t)(CO_Data*, UNS8);
-void _heartbeatError(CO_Data* d, UNS8 heartbeatID);
+typedef void (*heartbeatError_t)(UNS8);
+void _heartbeatError(UNS8 heartbeatID);
 
-typedef void (*post_SlaveBootup_t)(CO_Data*, UNS8);
-void _post_SlaveBootup(CO_Data* d, UNS8 SlaveID);
+typedef void (*post_SlaveBootup_t)(UNS8);
+void _post_SlaveBootup(UNS8 SlaveID);
 
-typedef void (*post_SlaveStateChange_t)(CO_Data*, UNS8, e_nodeState);
-void _post_SlaveStateChange(CO_Data* d, UNS8 nodeId, e_nodeState newNodeState);
+typedef void (*post_SlaveStateChange_t)(UNS8, e_nodeState);
+void _post_SlaveStateChange(UNS8 nodeId, e_nodeState newNodeState);
 
-typedef void (*nodeguardError_t)(CO_Data*, UNS8);
-void _nodeguardError(CO_Data* d, UNS8 id);
+typedef void (*nodeguardError_t)(UNS8);
+void _nodeguardError(UNS8 id);
 
 #include "data.h"
 
@@ -79,7 +79,7 @@ void _nodeguardError(CO_Data* d, UNS8 id);
  * @param *d Pointer on a CAN object data structure
  * @ingroup nodeguardo
  */
-void nodeguardInit(CO_Data* d);
+void nodeguardInit();
 
 /** 
  * @brief Stop producing node guarding messages
@@ -87,7 +87,7 @@ void nodeguardInit(CO_Data* d);
  * @param *d Pointer on a CAN object data structure
  * @ingroup nodeguardo
  */
-void nodeguardStop(CO_Data* d);
+void nodeguardStop();
 
 /** 
  * @brief Start the life guarding service (heartbeat/node guarding).
@@ -97,14 +97,14 @@ void nodeguardStop(CO_Data* d);
  *
  * @param *d Pointer on a CAN object data structure
  */
-void lifeGuardInit(CO_Data* d);
+void lifeGuardInit();
 
 /** 
  * @brief Stop the life guarding service (heartbeat/node guarding).
  *
  * @param *d Pointer on a CAN object data structure
  */
-void lifeGuardStop(CO_Data* d);
+void lifeGuardStop();
 
 /** 
  * @ingroup statemachine
@@ -115,7 +115,7 @@ void lifeGuardStop(CO_Data* d);
  * @param nodeId Id of a node
  * @return e_nodeState State of the node corresponding to the nodeId
  */
-e_nodeState getNodeState(CO_Data* d, UNS8 nodeId);
+e_nodeState getNodeState(UNS8 nodeId);
 
 /** 
  * @brief Start heartbeat consumer and producer
@@ -141,6 +141,6 @@ void heartbeatStop();
  * @param *m Pointer on the CAN-message which has to be analysed.
  * @ingroup nodeguardo
  */
-void proceedNODE_GUARD(CO_Data* d, Message* m);
+void proceedNODE_GUARD(Message* m);
 
 #endif /*__lifegrd_h__ */

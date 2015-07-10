@@ -61,35 +61,35 @@ typedef struct {
  * @brief Function that user app can overload
  * @ingroup statemachine
  */
-typedef void (*initialisation_t)(CO_Data*);
-typedef void (*preOperational_t)(CO_Data*);
-typedef void (*operational_t)(CO_Data*);
-typedef void (*stopped_t)(CO_Data*);
+typedef void (*initialisation_t)();
+typedef void (*preOperational_t)();
+typedef void (*operational_t)();
+typedef void (*stopped_t)();
 
 /** 
  * @ingroup statemachine
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
-// void _initialisation(CO_Data* d);
+// void _initialisation();
 /** 
  * @ingroup statemachine
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
-// void _preOperational(CO_Data* d);
+// void _preOperational();
 /**
  * @ingroup statemachine 
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
-// void _operational(CO_Data* d);
+// void _operational();
 /** 
  * @ingroup statemachine
  * @brief Function that user app can overload
  * @param *d Pointer on a CAN object data structure
  */
-// void _stopped(CO_Data* d);
+// void _stopped();
 
 /************************* prototypes ******************************/
 
@@ -98,7 +98,7 @@ typedef void (*stopped_t)(CO_Data*);
  * @param *d Pointer on a CAN object data structure
  * @param *m Pointer on a CAN message structure
  */
-void canDispatch(CO_Data* d, Message *m);
+void canDispatch(Message *m);
 
 /** 
  * @ingroup statemachine
@@ -106,7 +106,7 @@ void canDispatch(CO_Data* d, Message *m);
  * @param *d Pointer on a CAN object data structure
  * @return The node state
  */
-e_nodeState getState(CO_Data* d);
+e_nodeState getState();
 
 /** 
  * @ingroup statemachine
@@ -115,7 +115,7 @@ e_nodeState getState(CO_Data* d);
  * @param newState The state to assign
  * @return 
  */
-UNS8 setState(CO_Data* d, e_nodeState newState);
+UNS8 setState(e_nodeState newState);
 
 /**
  * @ingroup statemachine 
@@ -123,7 +123,7 @@ UNS8 setState(CO_Data* d, e_nodeState newState);
  * @param *d Pointer on a CAN object data structure
  * @return
  */
-UNS8 getNodeId(CO_Data* d);
+UNS8 getNodeId();
 
 #ifdef CO_ENABLE_CHANGE_NODE_ID
 /** 
@@ -132,13 +132,13 @@ UNS8 getNodeId(CO_Data* d);
  * @param *d Pointer on a CAN object data structure
  * @param nodeId The node ID to assign
  */
-void setNodeId (CO_Data* d, UNS8 nodeId);
+void setNodeId (UNS8 nodeId);
 #endif
 
 /** 
  * @brief Some stuff to do when the node enter in pre-operational mode
  * @param *d Pointer on a CAN object data structure
  */
-void initPreOperationalMode(CO_Data* d);
+void initPreOperationalMode();
 
 #endif

@@ -52,8 +52,8 @@ typedef struct {
 
 #include "data.h"
 
-typedef void (*post_emcy_t)(CO_Data* d, UNS8 nodeID, UNS16 errCode, UNS8 errReg);
-void _post_emcy(CO_Data* d, UNS8 nodeID, UNS16 errCode, UNS8 errReg);
+typedef void (*post_emcy_t)(UNS8 nodeID, UNS16 errCode, UNS8 errReg);
+void _post_emcy(UNS8 nodeID, UNS16 errCode, UNS8 errReg);
 
 /*************************************************************************
  * Functions
@@ -68,7 +68,7 @@ void _post_emcy(CO_Data* d, UNS8 nodeID, UNS16 errCode, UNS8 errReg);
  * @param addInfo
  * @return
  */
-UNS8 EMCY_setError(CO_Data* d, UNS16 errCode, UNS8 errRegMask, UNS16 addInfo);
+UNS8 EMCY_setError(UNS16 errCode, UNS8 errRegMask, UNS16 addInfo);
 
 /**
  * @ingroup emcy 
@@ -76,21 +76,21 @@ UNS8 EMCY_setError(CO_Data* d, UNS16 errCode, UNS8 errRegMask, UNS16 addInfo);
  * @param *d Pointer on a CAN object data structure
  * @param errCode The error code
  */
-void EMCY_errorRecovered(CO_Data* d, UNS16 errCode);
+void EMCY_errorRecovered(UNS16 errCode);
 
 /**
  * @ingroup emcy 
  * @brief Start EMCY consumer and producer
  * @param *d Pointer on a CAN object data structure
  */
-void emergencyInit(CO_Data* d);
+void emergencyInit();
 
 /** 
  * @ingroup emcy
  * @brief Stop EMCY producer and consumer
  * @param *d Pointer on a CAN object data structure 
  */
-void emergencyStop(CO_Data* d);
+void emergencyStop();
 
 /** 
  * @ingroup emcy
@@ -98,6 +98,6 @@ void emergencyStop(CO_Data* d);
  * @param *d Pointer on a CAN object data structure 
  * @param *m Pointer on the CAN-message which has to be analysed.
  */
-void proceedEMCY(CO_Data* d, Message* m);
+void proceedEMCY(Message* m);
 
 #endif /*__emcy_h__ */
