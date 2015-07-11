@@ -29,3 +29,6 @@
 /Default
 /test
 /Standard
+
+# Python
+*.pyc
