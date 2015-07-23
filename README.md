@@ -5,7 +5,7 @@
 * objdictedit from this repo needed to generate suitable object dictionary definition
 * mcp_can, BlinkPattern, digitalWriteFast and Timer libraries from my repos needed to successfully compile
 * MCP2515 chip select pin set in CO_can_Arduino.cpp
-* Usage: define CO<red_led_pin, green_led_pin> co; (-1 if no led needed), call co.CO_Init(); in setup(), call co.CO_Cycle(); in loop()
+* Usage: define `CO<red_led_pin, green_led_pin> co;` (-1 if no led needed), call `co.CO_Init();` in `setup()`, call `co.CO_Cycle();` in `loop()`
 * See example
 
 # History from 11/02/2015
